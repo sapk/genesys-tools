@@ -42,12 +42,21 @@ var dumpCmd = &cobra.Command{
 				logrus.Panicf("Login failed : %v", err)
 			}
 			logrus.Println(user)
+
+			hosts, err := c.ListHost()
+			if err != nil {
+				logrus.Panicf("ListHost failed : %v", err)
+			}
+			for _, host := range hosts {
+				logrus.Infof("Host: %s (%s)", host.Name, host.DBID)
+			}
 			apps, err := c.ListApplication()
 			if err != nil {
 				logrus.Panicf("ListApplication failed : %v", err)
 			}
-			logrus.Println(apps)
-			//TODO login
+			for _, app := range apps {
+				logrus.Infof("App: %s (%s) @ %s", app.Name, app.DBID, app.WorkDirectory)
+			}
 		}
 	},
 }

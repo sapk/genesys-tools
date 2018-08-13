@@ -16,7 +16,7 @@ type LoginResponse struct {
 
 type CfgObject struct {
 	Name string `json:"name"`
-	DBID int64  `json:"dbid"`
+	DBID string `json:"dbid"`
 }
 
 type CfgHost struct {

@@ -49,14 +49,24 @@ func (c *Client) Login(user, pass string) (*object.LoginResponse, error) {
 	return &u, err
 }
 
-func (c *Client) ListApplication() ([]object.CfgApplication, error) {
+func (c *Client) ListObject(t string, v interface{}) (*http.Response, error) {
 	req, err := c.newRequest("GET", "cfg/objects", nil)
 	if err != nil {
 		return nil, err
 	}
-	req.URL.RawQuery = "type=CfgApplication"
+	req.URL.RawQuery = "type=" + t
+	return c.do(req, v)
+}
+
+func (c *Client) ListApplication() ([]object.CfgApplication, error) {
 	var apps []object.CfgApplication
-	_, err = c.do(req, &apps)
+	_, err := c.ListObject("CfgApplication", &apps)
+	return apps, err
+}
+
+func (c *Client) ListHost() ([]object.CfgHost, error) {
+	var apps []object.CfgHost
+	_, err := c.ListObject("CfgHost", &apps)
 	return apps, err
 }
 
