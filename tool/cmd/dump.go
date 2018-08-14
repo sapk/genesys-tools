@@ -31,6 +31,8 @@ import (
 //TODO add follow folder structure for application
 //TODO manage multi-tenant
 //TODO replace strings.Count
+//TODO manage switch/dn and agent and routing
+//TODO add annex to application dumpt
 
 // listCmd represents the list command
 var dumpCmd = &cobra.Command{
@@ -267,8 +269,9 @@ func formatHost(host object.CfgHost, apps object.CfgApplicationList) string {
 		for _, port := range app.Portinfos.Portinfo {
 			ports += port.ID + "/" + port.Port + ", "
 		}
-		portListTxt += " - " + appName + " (" + ports[:len(ports)-2] + ")\n"
-
+		if len(ports) > 2 {
+			portListTxt += " - " + appName + " (" + ports[:len(ports)-2] + ")\n"
+		}
 		connections := ""
 		for _, c := range app.Appservers.Conninfo {
 			if c.Appserverdbid != host.Dbid {
