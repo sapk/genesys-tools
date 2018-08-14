@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var appVerbose bool
-var appCSVOutput bool
+
+//var appCSVOutput bool
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -32,7 +32,7 @@ func init() {
 	cobra.OnInitialize(initVerbose)
 
 	RootCmd.PersistentFlags().BoolVarP(&appVerbose, "verbose", "v", false, "Turn on verbose logging")
-	RootCmd.PersistentFlags().BoolVar(&appCSVOutput, "csv", false, "Turn on verbose logging output compatible with csv")
+	//RootCmd.PersistentFlags().BoolVar(&appCSVOutput, "csv", false, "Turn on verbose logging output compatible with csv")
 	//RootCmd.AddCommand(dump.DumpCmd)
 	//RootCmd.AddCommand(check.CheckCmd)
 }
@@ -43,10 +43,10 @@ func initVerbose() {
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
-
-	if !appCSVOutput {
-		logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
-		logrus.SetOutput(colorable.NewColorableStdout())
-	}
-
+	/*
+		if !appCSVOutput {
+			logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+			logrus.SetOutput(colorable.NewColorableStdout())
+		}
+	*/
 }

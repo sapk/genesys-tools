@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/emirpasic/gods/maps/treemap"
+	"github.com/emirpasic/gods/sets/treeset"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -25,11 +27,16 @@ import (
 // listCmd represents the list command
 var dumpCmd = &cobra.Command{
 	Use:   "dump",
-	Short: "Connect to a GAX server to dump his state",
+	Short: "Connect to a GAX server to dump its state",
 	Args: func(cmd *cobra.Command, args []string) error {
 		logrus.Debug("Checking args for list cmd: ", args)
+		/* TODO multi arg with subfolder
 		if len(args) > 1 {
 			return fmt.Errorf("requires at least one GAX server")
+		}
+		*/
+		if len(args) != 1 {
+			return fmt.Errorf("requires one GAX server")
 		}
 		for _, arg := range args {
 			if !check.IsValidClientArg(arg) {
@@ -65,7 +72,10 @@ var dumpCmd = &cobra.Command{
 			if err != nil {
 				logrus.Panicf("ListHost failed : %v", err)
 			}
-			sort.Sort(object.CfgHostList(hosts)) //order data by name
+			//sort.Sort(hosts) //order data by name
+			sort.Slice(hosts, func(i, j int) bool {
+				return hosts[i].Name > hosts[j].Name
+			})
 			err = dumpToFile("./Hosts.json", hosts)
 			if err != nil {
 				logrus.Panicf("Dump failed : %v", err)
@@ -75,7 +85,10 @@ var dumpCmd = &cobra.Command{
 			if err != nil {
 				logrus.Panicf("ListApplication failed : %v", err)
 			}
-			sort.Sort(object.CfgApplicationList(apps)) //order data by name
+			//sort.Sort(apps) //order data by name
+			sort.Slice(apps, func(i, j int) bool {
+				return apps[i].Name > apps[j].Name
+			})
 			err = dumpToFile("./Applications.json", apps)
 			if err != nil {
 				logrus.Panicf("Dump failed : %v", err)
@@ -147,15 +160,21 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 	ret += " Backupserver: " + backup + "\n"
 	ret += "\n"
 
-	portList := ""
+	ports := treemap.NewWithStringComparator() //TODO pass to int comparator ?
 	for _, p := range app.Portinfos.Portinfo {
-		portList += " - " + p.ID + " / " + p.Port + "\n"
+		ports.Put(p.Port, p.ID)
+	}
+	portList := ""
+	for _, id := range ports.Keys() {
+		port := id.(string)
+		val, _ := ports.Get(port)
+		portList += "  " + val.(string) + " / " + port + "\n"
 	}
 	ret += fmt.Sprintf("## Listening ports (%d): \n", strings.Count(portList, "\n"))
 	ret += portList
 	ret += "\n"
 
-	connList := ""
+	connections := treemap.NewWithStringComparator()
 	for _, c := range app.Appservers.Conninfo {
 		appserv := c.Appserverdbid
 		for _, a := range apps {
@@ -164,16 +183,41 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 				break
 			}
 		}
-		connList += " - " + appserv + " / " + c.ID + " / " + c.Mode + "\n"
+		connections.Put(appserv, c.ID+" / "+c.Mode)
+	}
+	connList := ""
+	for _, id := range connections.Keys() {
+		appName := id.(string)
+		val, _ := connections.Get(appName)
+		connList += "  " + appName + " / " + val.(string) + "\n"
 	}
 	ret += fmt.Sprintf("## Connections (%d): \n", strings.Count(connList, "\n"))
 	ret += connList
 	ret += "\n"
 
 	//TODO format as ini
-	optList := ""
+	sections := treeset.NewWithStringComparator() // empty (keys are of type int)
+	options := make(map[string]*treemap.Map)
 	for _, o := range app.Options.Property {
-		optList += " - [" + o.Section + "] / " + o.Key + " = " + o.Value + "\n"
+		sections.Add(o.Section)
+		if _, ok := options[o.Section]; !ok {
+			//Init
+			options[o.Section] = treemap.NewWithStringComparator()
+		}
+		options[o.Section].Put(o.Key, o.Value)
+	}
+	//for _, s := range set.Values() {
+	//}
+	optList := ""
+	for _, s := range sections.Values() {
+		sec := s.(string)
+		optList += " [" + sec + "]\n"
+		for _, o := range options[sec].Keys() {
+			opt := o.(string)
+			val, _ := options[s.(string)].Get(opt)
+			optList += "  " + opt + " = " + val.(string) + "\n"
+		}
+		//optList += " - [" + o.Section + "] / " + o.Key + " = " + o.Value + "\n"
 	}
 	ret += fmt.Sprintf("## Options (%d): \n", strings.Count(optList, "\n"))
 	ret += optList
