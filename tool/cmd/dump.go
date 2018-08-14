@@ -24,6 +24,8 @@ var (
 	dumpNoJSON   bool
 	dumpOnlyJSON bool
 	dumpFromJSON string
+	dumpUsername string
+	dumpPassword string
 )
 
 //TODO add flag for username and pass
@@ -38,6 +40,8 @@ func init() {
 	dumpCmd.Flags().BoolVar(&dumpNoJSON, "no-json", false, "Disable global json dump")
 	dumpCmd.Flags().BoolVar(&dumpOnlyJSON, "only-json", false, "Dump only global json")
 	dumpCmd.Flags().StringVarP(&dumpFromJSON, "from-json", "f", "", "Read data from JSON and not a live GAX (directory containing all json)")
+	dumpCmd.Flags().StringVarP(&dumpUsername, "user", "u", "default", "GAX user name")
+	dumpCmd.Flags().StringVarP(&dumpPassword, "pass", "p", "password", "GAX user password")
 	//TODO from-json
 	RootCmd.AddCommand(dumpCmd)
 }
@@ -152,7 +156,7 @@ func getGAXData(gax string) (object.CfgApplicationList, object.CfgHostList) {
 	}
 	///Login
 	c := client.NewClient(gax)
-	user, err := c.Login("default", "password")
+	user, err := c.Login(dumpUsername, dumpPassword)
 	if err != nil {
 		logrus.Panicf("Login failed : %v", err)
 	}
