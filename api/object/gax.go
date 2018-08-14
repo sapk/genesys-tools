@@ -15,17 +15,45 @@ type LoginResponse struct {
 }
 
 type CfgObject struct {
+	Dbid string `json:"dbid"`
 	Name string `json:"name"`
-	DBID string `json:"dbid"`
+	Type string `json:"type"`
 }
 
 type CfgHost struct {
 	*CfgObject
+	Ipaddress string `json:"ipaddress"`
+	Scsdbid   string `json:"scsdbid"`
+	Subtype   string `json:"subtype"`
+	Lcaport   string `json:"lcaport"`
+	Ostype    string `json:"ostype"`
+	State     string `json:"state"`
+	Folderid  string `json:"folderid"`
 }
 
 type CfgApplication struct {
 	*CfgObject
-	WorkDirectory string `json:"workdirectory"`
+	Workdirectory        string `json:"workdirectory"`
+	Startuptype          string `json:"startuptype"`
+	Autorestart          string `json:"autorestart"`
+	Isserver             string `json:"isserver"`
+	Startuptimeout       string `json:"startuptimeout"`
+	Backupserverdbid     string `json:"backupserverdbid"`
+	Version              string `json:"version"`
+	Isprimary            string `json:"isprimary"`
+	Timeout              string `json:"timeout"`
+	Commandline          string `json:"commandline"`
+	Folderid             string `json:"folderid"`
+	Redundancytype       string `json:"redundancytype"`
+	Commandlinearguments string `json:"commandlinearguments"`
+	Shutdowntimeout      string `json:"shutdowntimeout"`
+	Componenttype        string `json:"componenttype"`
+	Appprototypedbid     string `json:"appprototypedbid"`
+	Subtype              string `json:"subtype"`
+	Port                 string `json:"port"`
+	State                string `json:"state"`
+	Hostdbid             string `json:"hostdbid"`
+	Attempts             string `json:"attempts"`
 }
 
 type CfgObjectList []CfgObject

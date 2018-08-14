@@ -91,14 +91,14 @@ var dumpCmd = &cobra.Command{
 				logrus.Panicf("Folder creation failed : %v", err)
 			}
 			for _, host := range hosts {
-				logrus.Infof("Host: %s (%s)", host.Name, host.DBID)
+				logrus.Infof("Host: %s (%s)", host.Name, host.Dbid)
 				err = writeToFile("Hosts/"+host.Name+".md", formatHost(host, apps))
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
 				}
 			}
 			for _, app := range apps {
-				logrus.Infof("App: %s (%s) @ %s", app.Name, app.DBID, app.WorkDirectory)
+				logrus.Infof("App: %s (%s)", app.Name, app.Dbid)
 				err = writeToFile("Applications/"+app.Name+".md", formatApplication(app, hosts))
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
@@ -112,13 +112,17 @@ func formatApplication(app object.CfgApplication, hosts object.CfgHostList) stri
 	ret := "# " + app.Name + "\n"
 	ret += "\n"
 	ret += "## Informations: \n"
-	ret += " DBID: " + app.DBID + "\n"
+	ret += " Dbid: " + app.Dbid + "\n"
 	ret += " Name: " + app.Name + "\n"
+	ret += " Type: " + app.Type + "\n"
+	ret += " Subtype: " + app.Subtype + "\n"
 	ret += "\n"
 	ret += "## Listening ports: \n"
 	ret += "TODO\n"
 	ret += "\n"
 	ret += "## Connections: \n"
+	ret += "TODO\n"
+	ret += "## Options: \n"
 	ret += "TODO\n"
 	ret += "\n"
 	return ret
@@ -127,14 +131,28 @@ func formatApplication(app object.CfgApplication, hosts object.CfgHostList) stri
 func formatHost(host object.CfgHost, apps object.CfgApplicationList) string {
 	ret := "# " + host.Name + "\n"
 	ret += "\n"
+
 	ret += "## Informations: \n"
-	ret += " DBID: " + host.DBID + "\n"
+	ret += " Dbid: " + host.Dbid + "\n"
 	ret += " Name: " + host.Name + "\n"
+	ret += " Type: " + host.Type + "\n"
+	ret += " Subtype: " + host.Subtype + "\n"
+	ret += " OS: " + host.Ostype + "\n"
+	ret += " State: " + host.State + "\n"
+	ret += " IP: " + host.Ipaddress + "\n"
 	ret += "\n"
+
+	appList := ""
+	for _, app := range apps {
+		if app.Hostdbid == host.Dbid {
+			appList += " - " + app.Name + "\n"
+		}
+	}
+	ret += fmt.Sprintf("## Applications (%d): \n", strings.Count(appList, "\n"))
+	ret += appList
+	ret += "\n"
+
 	ret += "## Listening ports (all applications): \n"
-	ret += "TODO\n"
-	ret += "\n"
-	ret += "## Applications: \n"
 	ret += "TODO\n"
 	ret += "\n"
 	return ret
