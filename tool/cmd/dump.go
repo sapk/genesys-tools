@@ -23,10 +23,10 @@ import (
 var (
 	dumpNoJSON   bool
 	dumpOnlyJSON bool
+	dumpFromJSON string
 )
 
 //TODO add flag for username and pass
-//TODO add short option that only dump json doesn't format data
 //TODO add from dump (from short flag
 //TODO flag for no cleanup before export
 //TODO ajouter filter pour dump jsute un app ou un host
@@ -42,6 +42,7 @@ var (
 func init() {
 	dumpCmd.Flags().BoolVar(&dumpNoJSON, "no-json", false, "Disable global json dump")
 	dumpCmd.Flags().BoolVar(&dumpOnlyJSON, "only-json", false, "Dump only global json")
+	dumpCmd.Flags().StringVarP(&dumpFromJSON, "from-json", "f", "", "Read data from JSON and not a live GAX (directory containing all json)")
 	//TODO from-json
 	RootCmd.AddCommand(dumpCmd)
 }
@@ -57,7 +58,7 @@ var dumpCmd = &cobra.Command{
 			return fmt.Errorf("requires at least one GAX server")
 		}
 		*/
-		if len(args) != 1 {
+		if len(args) != 1 && dumpFromJSON == "" {
 			return fmt.Errorf("requires one GAX server")
 		}
 		for _, arg := range args {
@@ -69,62 +70,36 @@ var dumpCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, gax := range args {
-			if !strings.Contains(gax, ":") {
-				//By default use port 8080
-				gax += "8080"
-			}
-
-			///Login
-			c := client.NewClient(gax)
-			user, err := c.Login("default", "password")
-			if err != nil {
-				logrus.Panicf("Login failed : %v", err)
-			}
-			logrus.WithFields(logrus.Fields{
-				"User": user,
-			}).Debugf("Logged as: %s", user.Username)
-
-			//Cleanup
-			err = cleanAll()
-			if err != nil {
-				logrus.Panicf("Clean up failed : %v", err)
-			}
-
 			//Get DATA
-			//Hosts
-			hosts, err := c.ListHost()
-			if err != nil {
-				logrus.Panicf("ListHost failed : %v", err)
-			}
+			apps, hosts := getData(gax)
+
 			//sort.Sort(hosts) //order data by name
 			//TODO fix ordering
 			sort.Slice(hosts, func(i, j int) bool {
 				return hosts[i].Name > hosts[j].Name
 			})
-			if !dumpNoJSON {
-				err = dumpToFile("Hosts.json", hosts)
+			if !dumpNoJSON && dumpFromJSON == "" {
+				err := dumpToFile("Hosts.json", hosts)
 				if err != nil {
 					logrus.Panicf("Dump failed : %v", err)
 				}
-			}
-			//Applications
-			apps, err := c.ListApplication()
-			if err != nil {
-				logrus.Panicf("ListApplication failed : %v", err)
 			}
 			//sort.Sort(apps) //order data by name
 			//TODO fix ordering
 			sort.Slice(apps, func(i, j int) bool {
 				return apps[i].Name > apps[j].Name
 			})
-			if !dumpNoJSON {
-				err = dumpToFile("Applications.json", apps)
+			if !dumpNoJSON && dumpFromJSON == "" {
+				err := dumpToFile("Applications.json", apps)
 				if err != nil {
 					logrus.Panicf("Dump failed : %v", err)
 				}
 			}
 			if !dumpOnlyJSON { //Don't analyze data
-
+				err := clean("Hosts", "Applications")
+				if err != nil {
+					logrus.Panicf("Clean up failed : %v", err)
+				}
 				err = os.Mkdir("Hosts", 0755)
 				if err != nil {
 					logrus.Panicf("Folder creation failed : %v", err)
@@ -151,6 +126,57 @@ var dumpCmd = &cobra.Command{
 			}
 		}
 	},
+}
+
+func getData(gax string) (object.CfgApplicationList, object.CfgHostList) {
+	if dumpFromJSON == "" {
+		return getGAXData(gax)
+	}
+	return getJSONData(dumpFromJSON)
+}
+func getJSONData(dumpFromJSON string) (object.CfgApplicationList, object.CfgHostList) {
+	byteHosts, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, "Hosts.json"))
+	if err != nil {
+		logrus.Panicf("ListHost failed : %v", err)
+	}
+	var hosts object.CfgHostList
+	json.Unmarshal(byteHosts, &hosts)
+
+	byteApps, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, "Applications.json"))
+	if err != nil {
+		logrus.Panicf("ListApplication failed : %v", err)
+	}
+	var apps object.CfgApplicationList
+	json.Unmarshal(byteApps, &apps)
+	return apps, hosts
+}
+func getGAXData(gax string) (object.CfgApplicationList, object.CfgHostList) {
+	if !strings.Contains(gax, ":") {
+		//By default use port 8080
+		gax += "8080"
+	}
+	///Login
+	c := client.NewClient(gax)
+	user, err := c.Login("default", "password")
+	if err != nil {
+		logrus.Panicf("Login failed : %v", err)
+	}
+	logrus.WithFields(logrus.Fields{
+		"User": user,
+	}).Debugf("Logged as: %s", user.Username)
+
+	//Get DATA
+	//Hosts
+	hosts, err := c.ListHost()
+	if err != nil {
+		logrus.Panicf("ListHost failed : %v", err)
+	}
+	//Applications
+	apps, err := c.ListApplication()
+	if err != nil {
+		logrus.Panicf("ListApplication failed : %v", err)
+	}
+	return apps, hosts
 }
 
 //TODO order applications conn and port
@@ -373,10 +399,11 @@ func clean(pathList ...string) error {
 	return nil
 }
 
+/*
 func cleanAll() error {
 	return clean("Hosts.json", "Applications.json", "Hosts", "Applications")
 }
-
+*/
 func dumpToFile(file string, data interface{}) error {
 	json, err := json.Marshal(data)
 	if err != nil {
