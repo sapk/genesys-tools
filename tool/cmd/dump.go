@@ -231,7 +231,7 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 		}
 		//optList += " - [" + o.Section + "] / " + o.Key + " = " + o.Value + "\n"
 	}
-	ret += fmt.Sprintf("## Options (%d): \n", strings.Count(optList, "\n"))
+	ret += fmt.Sprintf("## Options (%d): \n", strings.Count(optList, "\n")-sections.Size())
 	ret += optList
 	ret += "\n"
 	return ret
