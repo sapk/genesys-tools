@@ -158,6 +158,7 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 	ret += " Startuptype: " + app.Startuptype + "\n"
 	ret += " Workdirectory: " + app.Workdirectory + "\n"
 	ret += " Commandline: " + app.Commandline + "\n"
+	ret += " Commandlinearguments: " + app.Commandlinearguments + "\n"
 	ret += " Autorestart: " + app.Autorestart + "\n"
 	ret += " Port principal: " + app.Port + "\n"
 	ret += " Redundancytype: " + app.Redundancytype + "\n"
@@ -207,8 +208,7 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 	ret += connList
 	ret += "\n"
 
-	//TODO format as ini
-	sections := treeset.NewWithStringComparator() // empty (keys are of type int)
+	sections := treeset.NewWithStringComparator()
 	options := make(map[string]*treemap.Map)
 	for _, o := range app.Options.Property {
 		sections.Add(o.Section)
@@ -218,8 +218,6 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 		}
 		options[o.Section].Put(o.Key, o.Value)
 	}
-	//for _, s := range set.Values() {
-	//}
 	optList := ""
 	for _, s := range sections.Values() {
 		sec := s.(string)
@@ -231,8 +229,34 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 		}
 		//optList += " - [" + o.Section + "] / " + o.Key + " = " + o.Value + "\n"
 	}
+
 	ret += fmt.Sprintf("## Options (%d): \n", strings.Count(optList, "\n")-sections.Size())
 	ret += optList
+	ret += "\n"
+
+	sectionsAnnex := treeset.NewWithStringComparator()
+	annexes := make(map[string]*treemap.Map)
+	for _, o := range app.Userproperties.Property {
+		sectionsAnnex.Add(o.Section)
+		if _, ok := annexes[o.Section]; !ok {
+			//Init
+			annexes[o.Section] = treemap.NewWithStringComparator()
+		}
+		annexes[o.Section].Put(o.Key, o.Value)
+	}
+	annexList := ""
+	for _, s := range sectionsAnnex.Values() {
+		sec := s.(string)
+		annexList += " [" + sec + "]\n"
+		for _, o := range annexes[sec].Keys() {
+			opt := o.(string)
+			val, _ := annexes[s.(string)].Get(opt)
+			annexList += "  " + opt + " = " + val.(string) + "\n"
+		}
+		//optList += " - [" + o.Section + "] / " + o.Key + " = " + o.Value + "\n"
+	}
+	ret += fmt.Sprintf("## Annexes (%d): \n", strings.Count(annexList, "\n")-sectionsAnnex.Size())
+	ret += annexList
 	ret += "\n"
 	return ret
 }

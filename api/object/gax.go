@@ -46,12 +46,20 @@ type CfgApplication struct {
 			ID            string `json:"id"`
 		} `json:"conninfo"`
 	} `json:"appservers"`
-	Autorestart string `json:"autorestart"`
-	Timeout     string `json:"timeout"`
-	Commandline string `json:"commandline"`
-	Folderid    string `json:"folderid"`
-	Subtype     string `json:"subtype"`
-	Options     struct {
+	Autorestart    string `json:"autorestart"`
+	Userproperties struct {
+		Property []struct {
+			Section string `json:"section"`
+			Value   string `json:"value"`
+			Key     string `json:"key"`
+		} `json:"property"`
+	} `json:"userproperties"`
+	Timeout              string `json:"timeout"`
+	Commandline          string `json:"commandline"`
+	Folderid             string `json:"folderid"`
+	Commandlinearguments string `json:"commandlinearguments"`
+	Subtype              string `json:"subtype"`
+	Options              struct {
 		Property []struct {
 			Section string `json:"section"`
 			Value   string `json:"value"`
