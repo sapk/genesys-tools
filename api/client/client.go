@@ -54,7 +54,7 @@ func (c *Client) ListObject(t string, v interface{}) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.URL.RawQuery = "type=" + t
+	req.URL.RawQuery = "brief=false&type=" + t
 	return c.do(req, v)
 }
 

@@ -82,7 +82,7 @@ var dumpCmd = &cobra.Command{
 			}
 
 			//TODO format data
-			err = os.Mkdir("Host", 0755)
+			err = os.Mkdir("Hosts", 0755)
 			if err != nil {
 				logrus.Panicf("Folder creation failed : %v", err)
 			}
@@ -92,14 +92,14 @@ var dumpCmd = &cobra.Command{
 			}
 			for _, host := range hosts {
 				logrus.Infof("Host: %s (%s)", host.Name, host.DBID)
-				err = writeToFile("Host/"+host.Name+".md", fmt.Sprintf("Host: %s (%s)", host.Name, host.DBID))
+				err = writeToFile("Hosts/"+host.Name+".md", formatHost(host, apps))
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
 				}
 			}
 			for _, app := range apps {
 				logrus.Infof("App: %s (%s) @ %s", app.Name, app.DBID, app.WorkDirectory)
-				err = writeToFile("Applications/"+app.Name+".md", fmt.Sprintf("App: %s (%s) @ %s", app.Name, app.DBID, app.WorkDirectory))
+				err = writeToFile("Applications/"+app.Name+".md", formatApplication(app, hosts))
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
 				}
@@ -108,6 +108,37 @@ var dumpCmd = &cobra.Command{
 	},
 }
 
+func formatApplication(app object.CfgApplication, hosts object.CfgHostList) string {
+	ret := "# " + app.Name + "\n"
+	ret += "\n"
+	ret += "## Informations: \n"
+	ret += " DBID: " + app.DBID + "\n"
+	ret += " Name: " + app.Name + "\n"
+	ret += "\n"
+	ret += "## Listening ports: \n"
+	ret += "TODO\n"
+	ret += "\n"
+	ret += "## Connections: \n"
+	ret += "TODO\n"
+	ret += "\n"
+	return ret
+}
+
+func formatHost(host object.CfgHost, apps object.CfgApplicationList) string {
+	ret := "# " + host.Name + "\n"
+	ret += "\n"
+	ret += "## Informations: \n"
+	ret += " DBID: " + host.DBID + "\n"
+	ret += " Name: " + host.Name + "\n"
+	ret += "\n"
+	ret += "## Listening ports (all applications): \n"
+	ret += "TODO\n"
+	ret += "\n"
+	ret += "## Applications: \n"
+	ret += "TODO\n"
+	ret += "\n"
+	return ret
+}
 func writeToFile(file, data string) error {
 	f, err := os.Create(file)
 	if err != nil {
