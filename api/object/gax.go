@@ -33,27 +33,59 @@ type CfgHost struct {
 
 type CfgApplication struct {
 	*CfgObject
-	Workdirectory        string `json:"workdirectory"`
-	Startuptype          string `json:"startuptype"`
-	Autorestart          string `json:"autorestart"`
-	Isserver             string `json:"isserver"`
-	Startuptimeout       string `json:"startuptimeout"`
-	Backupserverdbid     string `json:"backupserverdbid"`
-	Version              string `json:"version"`
-	Isprimary            string `json:"isprimary"`
-	Timeout              string `json:"timeout"`
-	Commandline          string `json:"commandline"`
-	Folderid             string `json:"folderid"`
-	Redundancytype       string `json:"redundancytype"`
-	Commandlinearguments string `json:"commandlinearguments"`
-	Shutdowntimeout      string `json:"shutdowntimeout"`
-	Componenttype        string `json:"componenttype"`
-	Appprototypedbid     string `json:"appprototypedbid"`
-	Subtype              string `json:"subtype"`
-	Port                 string `json:"port"`
-	State                string `json:"state"`
-	Hostdbid             string `json:"hostdbid"`
-	Attempts             string `json:"attempts"`
+	Appservers struct {
+		Conninfo []struct {
+			Mode          string `json:"mode"`
+			Appserverdbid string `json:"appserverdbid"`
+			Timoutlocal   string `json:"timoutlocal"`
+			Longfield1    string `json:"longfield1"`
+			Longfield2    string `json:"longfield2"`
+			Longfield3    string `json:"longfield3"`
+			Longfield4    string `json:"longfield4"`
+			Timoutremote  string `json:"timoutremote"`
+			ID            string `json:"id"`
+		} `json:"conninfo"`
+	} `json:"appservers"`
+	Autorestart string `json:"autorestart"`
+	Timeout     string `json:"timeout"`
+	Commandline string `json:"commandline"`
+	Folderid    string `json:"folderid"`
+	Subtype     string `json:"subtype"`
+	Options     struct {
+		Property []struct {
+			Section string `json:"section"`
+			Value   string `json:"value"`
+			Key     string `json:"key"`
+		} `json:"property"`
+	} `json:"options"`
+	State     string `json:"state"`
+	Hostdbid  string `json:"hostdbid"`
+	Attempts  string `json:"attempts"`
+	Portinfos struct {
+		Portinfo []struct {
+			Longfield1 string `json:"longfield1"`
+			Longfield2 string `json:"longfield2"`
+			Longfield3 string `json:"longfield3"`
+			Port       string `json:"port"`
+			Longfield4 string `json:"longfield4"`
+			ID         string `json:"id"`
+		} `json:"portinfo"`
+	} `json:"portinfos"`
+	Workdirectory string `json:"workdirectory"`
+	Startuptype   string `json:"startuptype"`
+	Isserver      string `json:"isserver"`
+	Resources     struct {
+		Resource []interface{} `json:"resource"`
+	} `json:"resources"`
+	Startuptimeout   string `json:"startuptimeout"`
+	Backupserverdbid string `json:"backupserverdbid"`
+	Version          string `json:"version"`
+	Isprimary        string `json:"isprimary"`
+	Redundancytype   string `json:"redundancytype"`
+	Shutdowntimeout  string `json:"shutdowntimeout"`
+	Componenttype    string `json:"componenttype"`
+	Appprototypedbid string `json:"appprototypedbid"`
+	Port             string `json:"port"`
 }
 
 type CfgObjectList []CfgObject

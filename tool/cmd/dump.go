@@ -99,7 +99,7 @@ var dumpCmd = &cobra.Command{
 			}
 			for _, app := range apps {
 				logrus.Infof("App: %s (%s)", app.Name, app.Dbid)
-				err = writeToFile("Applications/"+app.Name+".md", formatApplication(app, hosts))
+				err = writeToFile("Applications/"+app.Name+".md", formatApplication(app, apps, hosts))
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
 				}
@@ -108,22 +108,75 @@ var dumpCmd = &cobra.Command{
 	},
 }
 
-func formatApplication(app object.CfgApplication, hosts object.CfgHostList) string {
+//TODO order applications conn and port
+func formatApplication(app object.CfgApplication, apps object.CfgApplicationList, hosts object.CfgHostList) string {
 	ret := "# " + app.Name + "\n"
 	ret += "\n"
 	ret += "## Informations: \n"
 	ret += " Dbid: " + app.Dbid + "\n"
 	ret += " Name: " + app.Name + "\n"
+	host := app.Hostdbid
+	for _, h := range hosts {
+		if app.Hostdbid == h.Dbid {
+			host = h.Name
+			break
+		}
+	}
+	ret += " Host: " + host + "\n"
 	ret += " Type: " + app.Type + "\n"
 	ret += " Subtype: " + app.Subtype + "\n"
+	ret += " Componenttype: " + app.Componenttype + "\n"
+	ret += " Appprototypedbid: " + app.Appprototypedbid + "\n" //TODO
+	ret += " Isserver: " + app.Isserver + "\n"
+	ret += " Version: " + app.Version + "\n"
+	ret += " State: " + app.State + "\n"
+	ret += " Startuptype: " + app.Startuptype + "\n"
+	ret += " Workdirectory: " + app.Workdirectory + "\n"
+	ret += " Commandline: " + app.Commandline + "\n"
+	ret += " Autorestart: " + app.Autorestart + "\n"
+	ret += " Port principal: " + app.Port + "\n"
+	ret += " Redundancytype: " + app.Redundancytype + "\n"
+	ret += " Isprimary: " + app.Isprimary + "\n"
+	backup := app.Backupserverdbid
+	for _, a := range apps {
+		if app.Backupserverdbid == a.Dbid {
+			backup = a.Name
+			break
+		}
+	}
+	ret += " Backupserver: " + backup + "\n"
 	ret += "\n"
-	ret += "## Listening ports: \n"
-	ret += "TODO\n"
+
+	portList := ""
+	for _, p := range app.Portinfos.Portinfo {
+		portList += " - " + p.ID + " / " + p.Port + "\n"
+	}
+	ret += fmt.Sprintf("## Listening ports (%d): \n", strings.Count(portList, "\n"))
+	ret += portList
 	ret += "\n"
-	ret += "## Connections: \n"
-	ret += "TODO\n"
-	ret += "## Options: \n"
-	ret += "TODO\n"
+
+	connList := ""
+	for _, c := range app.Appservers.Conninfo {
+		appserv := c.Appserverdbid
+		for _, a := range apps {
+			if c.Appserverdbid == a.Dbid {
+				appserv = a.Name
+				break
+			}
+		}
+		connList += " - " + appserv + " / " + c.ID + " / " + c.Mode + "\n"
+	}
+	ret += fmt.Sprintf("## Connections (%d): \n", strings.Count(connList, "\n"))
+	ret += connList
+	ret += "\n"
+
+	//TODO format as ini
+	optList := ""
+	for _, o := range app.Options.Property {
+		optList += " - [" + o.Section + "] / " + o.Key + " = " + o.Value + "\n"
+	}
+	ret += fmt.Sprintf("## Options (%d): \n", strings.Count(optList, "\n"))
+	ret += optList
 	ret += "\n"
 	return ret
 }
