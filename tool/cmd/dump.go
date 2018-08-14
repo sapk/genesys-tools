@@ -27,17 +27,12 @@ var (
 )
 
 //TODO add flag for username and pass
-//TODO add from dump (from short flag
-//TODO flag for no cleanup before export
 //TODO ajouter filter pour dump jsute un app ou un host
-//TODO interactive loadin bar
-//TODO listing port et connection entre host
-//TODO voir pour les liens backup et synchor
+//TODO interactive loading bar
+//TODO voir pour les liens backup et synchor (pour connection entre host et app)
 //TODO add follow folder structure for application
 //TODO manage multi-tenant
-//TODO replace strings.Count
 //TODO manage switch/dn and agent and routing
-//TODO add annex to application dumpt
 
 func init() {
 	dumpCmd.Flags().BoolVar(&dumpNoJSON, "no-json", false, "Disable global json dump")
@@ -229,7 +224,7 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 		val, _ := ports.Get(port)
 		portList += "  " + val.(string) + " / " + port + "\n"
 	}
-	ret += fmt.Sprintf("## Listening ports (%d): \n", strings.Count(portList, "\n"))
+	ret += fmt.Sprintf("## Listening ports (%d): \n", ports.Size())
 	ret += portList
 	ret += "\n"
 
@@ -250,7 +245,7 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 		val, _ := connections.Get(appName)
 		connList += "  " + appName + " / " + val.(string) + "\n"
 	}
-	ret += fmt.Sprintf("## Connections (%d): \n", strings.Count(connList, "\n"))
+	ret += fmt.Sprintf("## Connections (%d): \n", connections.Size())
 	ret += connList
 	ret += "\n"
 
