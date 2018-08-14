@@ -26,6 +26,11 @@ import (
 //TODO flag for no cleanup before export
 //TODO ajouter filter pour dump jsute un app ou un host
 //TODO interactive loadin bar
+//TODO listing port et connection entre host
+//TODO voir pour les liens backup et synchor
+//TODO add follow folder structure for application
+//TODO manage multi-tenant
+//TODO replace strings.Count
 
 // listCmd represents the list command
 var dumpCmd = &cobra.Command{
@@ -244,21 +249,59 @@ func formatHost(host object.CfgHost, apps object.CfgApplicationList) string {
 	ret += " IP: " + host.Ipaddress + "\n"
 	ret += "\n"
 
-	appList := ""
+	appList := treemap.NewWithStringComparator()
 	for _, app := range apps {
 		if app.Hostdbid == host.Dbid {
-			appList += " - " + app.Name + "\n"
+			appList.Put(app.Name, app)
 		}
 	}
-	ret += fmt.Sprintf("## Applications (%d): \n", strings.Count(appList, "\n"))
-	ret += appList
+	appListTxt := ""
+	portListTxt := ""
+	connListTxt := ""
+	for _, id := range appList.Keys() {
+		appName := id.(string)
+		obj, _ := appList.Get(appName)
+		app := obj.(object.CfgApplication)
+		appListTxt += " - " + appName + "\n"
+		ports := ""
+		for _, port := range app.Portinfos.Portinfo {
+			ports += port.ID + "/" + port.Port + ", "
+		}
+		portListTxt += " - " + appName + " (" + ports[:len(ports)-2] + ")\n"
+
+		connections := ""
+		for _, c := range app.Appservers.Conninfo {
+			if c.Appserverdbid != host.Dbid {
+				appserv := c.Appserverdbid
+				for _, a := range apps {
+					if c.Appserverdbid == a.Dbid {
+						appserv = a.Name
+						break
+					}
+				}
+				connections += appserv + "/" + c.ID + "/" + c.Mode + ", "
+			}
+		}
+		//TODO handle link with backup
+		if len(connections) > 2 {
+			connListTxt += " - " + appName + " -> (" + connections[:len(connections)-2] + ")\n"
+		}
+	}
+	ret += fmt.Sprintf("## Applications (%d): \n", appList.Size())
+	ret += appListTxt
 	ret += "\n"
 
 	ret += "## Listening ports (all applications): \n"
-	ret += "TODO\n"
+	ret += portListTxt
 	ret += "\n"
+
+	ret += "## [WIP] Connection with (client with connection outside): \n"
+	ret += connListTxt
+	ret += "\n"
+
 	return ret
 }
+
 func writeToFile(file, data string) error {
 	f, err := os.Create(file)
 	if err != nil {
@@ -273,20 +316,18 @@ func writeToFile(file, data string) error {
 	return nil
 }
 
+func clean(pathList ...string) error {
+	for _, p := range pathList {
+		err := os.RemoveAll(p)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func cleanAll() error {
-	err := os.RemoveAll("Hosts.json")
-	if err != nil {
-		return err
-	}
-	err = os.RemoveAll("Applications.json")
-	if err != nil {
-		return err
-	}
-	err = os.RemoveAll("Hosts")
-	if err != nil {
-		return err
-	}
-	return os.RemoveAll("Applications")
+	return clean("Hosts.json", "Applications.json", "Hosts", "Applications")
 }
 
 func dumpToFile(file string, data interface{}) error {
