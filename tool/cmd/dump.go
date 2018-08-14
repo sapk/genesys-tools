@@ -20,6 +20,11 @@ import (
 	"github.com/sapk/genesys/tool/check"
 )
 
+var (
+	dumpNoJSON   bool
+	dumpOnlyJSON bool
+)
+
 //TODO add flag for username and pass
 //TODO add short option that only dump json doesn't format data
 //TODO add from dump (from short flag
@@ -33,6 +38,13 @@ import (
 //TODO replace strings.Count
 //TODO manage switch/dn and agent and routing
 //TODO add annex to application dumpt
+
+func init() {
+	dumpCmd.Flags().BoolVar(&dumpNoJSON, "no-json", false, "Disable global json dump")
+	dumpCmd.Flags().BoolVar(&dumpOnlyJSON, "only-json", false, "Dump only global json")
+	//TODO from-json
+	RootCmd.AddCommand(dumpCmd)
+}
 
 // listCmd represents the list command
 var dumpCmd = &cobra.Command{
@@ -68,7 +80,9 @@ var dumpCmd = &cobra.Command{
 			if err != nil {
 				logrus.Panicf("Login failed : %v", err)
 			}
-			logrus.Println(user)
+			logrus.WithFields(logrus.Fields{
+				"User": user,
+			}).Debugf("Logged as: %s", user.Username)
 
 			//Cleanup
 			err = cleanAll()
@@ -87,9 +101,11 @@ var dumpCmd = &cobra.Command{
 			sort.Slice(hosts, func(i, j int) bool {
 				return hosts[i].Name > hosts[j].Name
 			})
-			err = dumpToFile("Hosts.json", hosts)
-			if err != nil {
-				logrus.Panicf("Dump failed : %v", err)
+			if !dumpNoJSON {
+				err = dumpToFile("Hosts.json", hosts)
+				if err != nil {
+					logrus.Panicf("Dump failed : %v", err)
+				}
 			}
 			//Applications
 			apps, err := c.ListApplication()
@@ -101,33 +117,37 @@ var dumpCmd = &cobra.Command{
 			sort.Slice(apps, func(i, j int) bool {
 				return apps[i].Name > apps[j].Name
 			})
-			err = dumpToFile("Applications.json", apps)
-			if err != nil {
-				logrus.Panicf("Dump failed : %v", err)
+			if !dumpNoJSON {
+				err = dumpToFile("Applications.json", apps)
+				if err != nil {
+					logrus.Panicf("Dump failed : %v", err)
+				}
 			}
+			if !dumpOnlyJSON { //Don't analyze data
 
-			//TODO format data
-			err = os.Mkdir("Hosts", 0755)
-			if err != nil {
-				logrus.Panicf("Folder creation failed : %v", err)
-			}
-			err = os.Mkdir("Applications", 0755)
-			if err != nil {
-				logrus.Panicf("Folder creation failed : %v", err)
-			}
-			for _, host := range hosts {
-				logrus.Infof("Host: %s (%s)", host.Name, host.Dbid)
-				err = writeToFile(filepath.Join("Hosts", host.Name+".md"), formatHost(host, apps))
+				err = os.Mkdir("Hosts", 0755)
 				if err != nil {
-					logrus.Panicf("File creation failed : %v", err)
+					logrus.Panicf("Folder creation failed : %v", err)
 				}
-			}
-			for _, app := range apps {
-				logrus.Infof("App: %s (%s)", app.Name, app.Dbid)
-				err = writeToFile(filepath.Join("Applications", app.Name+".md"), formatApplication(app, apps, hosts))
+				err = os.Mkdir("Applications", 0755)
 				if err != nil {
-					logrus.Panicf("File creation failed : %v", err)
+					logrus.Panicf("Folder creation failed : %v", err)
 				}
+				for _, host := range hosts {
+					logrus.Infof("Host: %s (%s)", host.Name, host.Dbid)
+					err = writeToFile(filepath.Join("Hosts", host.Name+".md"), formatHost(host, apps))
+					if err != nil {
+						logrus.Panicf("File creation failed : %v", err)
+					}
+				}
+				for _, app := range apps {
+					logrus.Infof("App: %s (%s)", app.Name, app.Dbid)
+					err = writeToFile(filepath.Join("Applications", app.Name+".md"), formatApplication(app, apps, hosts))
+					if err != nil {
+						logrus.Panicf("File creation failed : %v", err)
+					}
+				}
+
 			}
 		}
 	},
@@ -363,8 +383,4 @@ func dumpToFile(file string, data interface{}) error {
 		return err
 	}
 	return ioutil.WriteFile(file, json, 0644)
-}
-
-func init() {
-	RootCmd.AddCommand(dumpCmd)
 }
