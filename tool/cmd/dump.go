@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -23,6 +24,8 @@ import (
 //TODO add short option that only dump json doesn't format data
 //TODO add from dump (from short flag
 //TODO flag for no cleanup before export
+//TODO ajouter filter pour dump jsute un app ou un host
+//TODO interactive loadin bar
 
 // listCmd represents the list command
 var dumpCmd = &cobra.Command{
@@ -77,7 +80,7 @@ var dumpCmd = &cobra.Command{
 			sort.Slice(hosts, func(i, j int) bool {
 				return hosts[i].Name > hosts[j].Name
 			})
-			err = dumpToFile("./Hosts.json", hosts)
+			err = dumpToFile("Hosts.json", hosts)
 			if err != nil {
 				logrus.Panicf("Dump failed : %v", err)
 			}
@@ -91,7 +94,7 @@ var dumpCmd = &cobra.Command{
 			sort.Slice(apps, func(i, j int) bool {
 				return apps[i].Name > apps[j].Name
 			})
-			err = dumpToFile("./Applications.json", apps)
+			err = dumpToFile("Applications.json", apps)
 			if err != nil {
 				logrus.Panicf("Dump failed : %v", err)
 			}
@@ -107,14 +110,14 @@ var dumpCmd = &cobra.Command{
 			}
 			for _, host := range hosts {
 				logrus.Infof("Host: %s (%s)", host.Name, host.Dbid)
-				err = writeToFile("Hosts/"+host.Name+".md", formatHost(host, apps))
+				err = writeToFile(filepath.Join("Hosts", host.Name+".md"), formatHost(host, apps))
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
 				}
 			}
 			for _, app := range apps {
 				logrus.Infof("App: %s (%s)", app.Name, app.Dbid)
-				err = writeToFile("Applications/"+app.Name+".md", formatApplication(app, apps, hosts))
+				err = writeToFile(filepath.Join("Applications", app.Name+".md"), formatApplication(app, apps, hosts))
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
 				}
@@ -271,19 +274,19 @@ func writeToFile(file, data string) error {
 }
 
 func cleanAll() error {
-	err := os.RemoveAll("./Hosts.json")
+	err := os.RemoveAll("Hosts.json")
 	if err != nil {
 		return err
 	}
-	err = os.RemoveAll("./Applications.json")
+	err = os.RemoveAll("Applications.json")
 	if err != nil {
 		return err
 	}
-	err = os.RemoveAll("./Hosts")
+	err = os.RemoveAll("Hosts")
 	if err != nil {
 		return err
 	}
-	return os.RemoveAll("./Applications")
+	return os.RemoveAll("Applications")
 }
 
 func dumpToFile(file string, data interface{}) error {
