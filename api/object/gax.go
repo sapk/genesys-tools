@@ -90,6 +90,7 @@ type CfgApplication struct {
 
 type CfgObjectList []CfgObject
 
+/*
 func (l CfgObjectList) Len() int      { return len(l) }
 func (l CfgObjectList) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
 func (l CfgObjectList) Less(i, j int) bool {
@@ -98,9 +99,10 @@ func (l CfgObjectList) Less(i, j int) bool {
 	//log.Debugf("Comparing %s < %s", ai, aj, ai < aj)
 	return li < lj
 }
-
+*/
 type CfgApplicationList []CfgApplication
 
+/*
 func (l CfgApplicationList) Len() int      { return len(l) }
 func (l CfgApplicationList) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
 func (l CfgApplicationList) Less(i, j int) bool {
@@ -109,9 +111,10 @@ func (l CfgApplicationList) Less(i, j int) bool {
 	//log.Debugf("Comparing %s < %s", ai, aj, ai < aj)
 	return li < lj
 }
-
+*/
 type CfgHostList []CfgHost
 
+/*
 func (l CfgHostList) Len() int      { return len(l) }
 func (l CfgHostList) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
 func (l CfgHostList) Less(i, j int) bool {
@@ -120,3 +123,4 @@ func (l CfgHostList) Less(i, j int) bool {
 	//log.Debugf("Comparing %s < %s", ai, aj, ai < aj)
 	return li < lj
 }
+*/

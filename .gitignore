@@ -2,3 +2,5 @@
 Applications/
 Hosts/
 /genesys
+/genesys-tools
+/build

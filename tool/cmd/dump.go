@@ -73,6 +73,7 @@ var dumpCmd = &cobra.Command{
 				logrus.Panicf("ListHost failed : %v", err)
 			}
 			//sort.Sort(hosts) //order data by name
+			//TODO fix ordering
 			sort.Slice(hosts, func(i, j int) bool {
 				return hosts[i].Name > hosts[j].Name
 			})
@@ -86,6 +87,7 @@ var dumpCmd = &cobra.Command{
 				logrus.Panicf("ListApplication failed : %v", err)
 			}
 			//sort.Sort(apps) //order data by name
+			//TODO fix ordering
 			sort.Slice(apps, func(i, j int) bool {
 				return apps[i].Name > apps[j].Name
 			})
