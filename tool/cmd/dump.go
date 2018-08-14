@@ -28,7 +28,7 @@ var (
 	dumpPassword string
 )
 
-//TODO add flag for username and pass
+//TODO add scheme (http/https) flag or assume default http
 //TODO ajouter filter pour dump jsute un app ou un host
 //TODO interactive loading bar
 //TODO voir pour les liens backup et synchor (pour connection entre host et app)
