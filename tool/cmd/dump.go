@@ -15,9 +15,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/sapk/genesys/api/client"
-	"github.com/sapk/genesys/api/object"
-	"github.com/sapk/genesys/tool/check"
+	"github.com/sapk/go-genesys/api/client"
+	"github.com/sapk/go-genesys/api/object"
+	"github.com/sapk/go-genesys/tool/check"
 )
 
 var (
