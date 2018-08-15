@@ -21,6 +21,7 @@ import (
 )
 
 var (
+	dumpFull     bool
 	dumpNoJSON   bool
 	dumpOnlyJSON bool
 	dumpFromJSON string
@@ -37,6 +38,7 @@ var (
 //TODO manage switch/dn and agent and routing
 
 func init() {
+	dumpCmd.Flags().BoolVar(&dumpFull, "full", false, "[WIP] Get also switch, dn, person, place, ...")
 	dumpCmd.Flags().BoolVar(&dumpNoJSON, "no-json", false, "Disable global json dump")
 	dumpCmd.Flags().BoolVar(&dumpOnlyJSON, "only-json", false, "Dump only global json")
 	dumpCmd.Flags().StringVarP(&dumpFromJSON, "from-json", "f", "", "Read data from JSON and not a live GAX (directory containing all json)")
@@ -71,31 +73,49 @@ var dumpCmd = &cobra.Command{
 		for _, gax := range args {
 			//Get DATA
 			apps, hosts := getData(gax)
+			var (
+				switchs []object.CfgSwitch
+				dns     []object.CfgDN
+				places  []object.CfgPlace
+			)
+			if dumpFull {
+				switchs, dns, places = getDataExtended(gax)
+			}
 
 			//sort.Sort(hosts) //order data by name
 			//TODO fix ordering
 			sort.Slice(hosts, func(i, j int) bool {
 				return hosts[i].Name > hosts[j].Name
 			})
+			sort.Slice(apps, func(i, j int) bool {
+				return apps[i].Name > apps[j].Name
+			})
 			if !dumpNoJSON && dumpFromJSON == "" {
 				err := dumpToFile("Hosts.json", hosts)
 				if err != nil {
 					logrus.Panicf("Dump failed : %v", err)
 				}
-			}
-			//sort.Sort(apps) //order data by name
-			//TODO fix ordering
-			sort.Slice(apps, func(i, j int) bool {
-				return apps[i].Name > apps[j].Name
-			})
-			if !dumpNoJSON && dumpFromJSON == "" {
-				err := dumpToFile("Applications.json", apps)
+				err = dumpToFile("Applications.json", apps)
 				if err != nil {
 					logrus.Panicf("Dump failed : %v", err)
 				}
+				if dumpFull {
+					err = dumpToFile("Switchs.json", switchs)
+					if err != nil {
+						logrus.Panicf("Dump failed : %v", err)
+					}
+					err = dumpToFile("DNs.json", dns)
+					if err != nil {
+						logrus.Panicf("Dump failed : %v", err)
+					}
+					err = dumpToFile("Places.json", places)
+					if err != nil {
+						logrus.Panicf("Dump failed : %v", err)
+					}
+				}
 			}
 			if !dumpOnlyJSON { //Don't analyze data
-				err := clean("Hosts", "Applications")
+				err := clean("Hosts", "Applications", "Switchs", "DNs", "Places")
 				if err != nil {
 					logrus.Panicf("Clean up failed : %v", err)
 				}
@@ -106,6 +126,21 @@ var dumpCmd = &cobra.Command{
 				err = os.Mkdir("Applications", 0755)
 				if err != nil {
 					logrus.Panicf("Folder creation failed : %v", err)
+				}
+				if dumpFull {
+					//TODO inprove by refactor repetive code
+					err = os.Mkdir("Switchs", 0755)
+					if err != nil {
+						logrus.Panicf("Folder creation failed : %v", err)
+					}
+					err = os.Mkdir("DNs", 0755)
+					if err != nil {
+						logrus.Panicf("Folder creation failed : %v", err)
+					}
+					err = os.Mkdir("Places", 0755)
+					if err != nil {
+						logrus.Panicf("Folder creation failed : %v", err)
+					}
 				}
 				for _, host := range hosts {
 					logrus.Infof("Host: %s (%s)", host.Name, host.Dbid)
@@ -121,40 +156,125 @@ var dumpCmd = &cobra.Command{
 						logrus.Panicf("File creation failed : %v", err)
 					}
 				}
-
+				if dumpFull {
+					//TODO inprove by refactor repetive code
+					for _, s := range switchs {
+						logrus.Infof("Switch: %s (%s)", s.Name, s.Dbid)
+						err = writeToFile(filepath.Join("Switchs", s.Name+".md"), formatSwitch(s))
+						if err != nil {
+							logrus.Panicf("File creation failed : %v", err)
+						}
+					}
+					for _, d := range dns {
+						logrus.Infof("DN: %s (%s)", d.Name, d.Dbid)
+						err = writeToFile(filepath.Join("DNs", d.Name+".md"), formatDN(d))
+						if err != nil {
+							logrus.Panicf("File creation failed : %v", err)
+						}
+					}
+					for _, p := range places {
+						logrus.Infof("Place: %s (%s)", p.Name, p.Dbid)
+						err = writeToFile(filepath.Join("Places", p.Name+".md"), formatPlace(p))
+						if err != nil {
+							logrus.Panicf("File creation failed : %v", err)
+						}
+					}
+				}
 			}
 		}
 	},
 }
 
-func getData(gax string) (object.CfgApplicationList, object.CfgHostList) {
+func getDataExtended(gax string) ([]object.CfgSwitch, []object.CfgDN, []object.CfgPlace) {
+	if dumpFromJSON == "" {
+		return getGAXDataExtended(gax)
+	}
+	return getJSONDataExtended(dumpFromJSON)
+}
+func getData(gax string) ([]object.CfgApplication, []object.CfgHost) {
 	if dumpFromJSON == "" {
 		return getGAXData(gax)
 	}
 	return getJSONData(dumpFromJSON)
 }
-func getJSONData(dumpFromJSON string) (object.CfgApplicationList, object.CfgHostList) {
+
+func getJSONDataExtended(dumpFromJSON string) ([]object.CfgSwitch, []object.CfgDN, []object.CfgPlace) {
+	byteSwitchs, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, "Switchs.json"))
+	if err != nil {
+		logrus.Panicf("ListSwitch failed : %v", err)
+	}
+	var sws []object.CfgSwitch
+	json.Unmarshal(byteSwitchs, &sws)
+
+	byteDNs, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, "DNs.json"))
+	if err != nil {
+		logrus.Panicf("ListDN failed : %v", err)
+	}
+	var dns []object.CfgDN
+	json.Unmarshal(byteDNs, &dns)
+
+	bytePlaces, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, "Places.json"))
+	if err != nil {
+		logrus.Panicf("ListPlace failed : %v", err)
+	}
+	var places []object.CfgPlace
+	json.Unmarshal(bytePlaces, &places)
+
+	return sws, dns, places
+}
+func getGAXDataExtended(gax string) ([]object.CfgSwitch, []object.CfgDN, []object.CfgPlace) {
+	//Login
+	c := client.NewClient(gax)
+	user, err := c.Login(dumpUsername, dumpPassword)
+	if err != nil {
+		logrus.Panicf("Login failed : %v", err)
+	}
+	logrus.WithFields(logrus.Fields{
+		"User": user,
+	}).Debugf("Logged as: %s", user.Username)
+
+	//Get DATA
+	//Switch
+	sws, err := c.ListSwitch()
+	if err != nil {
+		logrus.Panicf("ListSwitch failed : %v", err)
+	}
+	//DN
+	dns, err := c.ListDN()
+	if err != nil {
+		logrus.Panicf("ListDN failed : %v", err)
+	}
+	//Places
+	places, err := c.ListPlace()
+	if err != nil {
+		logrus.Panicf("ListPlace failed : %v", err)
+	}
+	return sws, dns, places
+}
+
+func getJSONData(dumpFromJSON string) ([]object.CfgApplication, []object.CfgHost) {
 	byteHosts, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, "Hosts.json"))
 	if err != nil {
 		logrus.Panicf("ListHost failed : %v", err)
 	}
-	var hosts object.CfgHostList
+	var hosts []object.CfgHost
 	json.Unmarshal(byteHosts, &hosts)
 
 	byteApps, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, "Applications.json"))
 	if err != nil {
 		logrus.Panicf("ListApplication failed : %v", err)
 	}
-	var apps object.CfgApplicationList
+	var apps []object.CfgApplication
 	json.Unmarshal(byteApps, &apps)
 	return apps, hosts
 }
-func getGAXData(gax string) (object.CfgApplicationList, object.CfgHostList) {
+
+func getGAXData(gax string) ([]object.CfgApplication, []object.CfgHost) {
 	if !strings.Contains(gax, ":") {
 		//By default use port 8080
 		gax += "8080"
 	}
-	///Login
+	//Login
 	c := client.NewClient(gax)
 	user, err := c.Login(dumpUsername, dumpPassword)
 	if err != nil {
@@ -179,7 +299,7 @@ func getGAXData(gax string) (object.CfgApplicationList, object.CfgHostList) {
 }
 
 //TODO order applications conn and port
-func formatApplication(app object.CfgApplication, apps object.CfgApplicationList, hosts object.CfgHostList) string {
+func formatApplication(app object.CfgApplication, apps []object.CfgApplication, hosts []object.CfgHost) string {
 	ret := "# " + app.Name + "\n"
 	ret += "\n"
 	ret += "## Informations: \n"
@@ -306,7 +426,7 @@ func formatApplication(app object.CfgApplication, apps object.CfgApplicationList
 	return ret
 }
 
-func formatHost(host object.CfgHost, apps object.CfgApplicationList) string {
+func formatHost(host object.CfgHost, apps []object.CfgApplication) string {
 	ret := "# " + host.Name + "\n"
 	ret += "\n"
 
@@ -374,6 +494,24 @@ func formatHost(host object.CfgHost, apps object.CfgApplicationList) string {
 	return ret
 }
 
+func formatSwitch(s object.CfgSwitch) string {
+	ret := "# " + s.Name + "\n"
+	ret += "\n"
+
+	return ret
+}
+func formatDN(d object.CfgDN) string {
+	ret := "# " + d.Name + "\n"
+	ret += "\n"
+
+	return ret
+}
+func formatPlace(p object.CfgPlace) string {
+	ret := "# " + p.Name + "\n"
+	ret += "\n"
+
+	return ret
+}
 func writeToFile(file, data string) error {
 	f, err := os.Create(file)
 	if err != nil {

@@ -70,6 +70,24 @@ func (c *Client) ListHost() ([]object.CfgHost, error) {
 	return apps, err
 }
 
+func (c *Client) ListDN() ([]object.CfgDN, error) {
+	var apps []object.CfgDN
+	_, err := c.ListObject("CfgDN", &apps)
+	return apps, err
+}
+
+func (c *Client) ListSwitch() ([]object.CfgSwitch, error) {
+	var apps []object.CfgSwitch
+	_, err := c.ListObject("CfgSwitch", &apps)
+	return apps, err
+}
+
+func (c *Client) ListPlace() ([]object.CfgPlace, error) {
+	var apps []object.CfgPlace
+	_, err := c.ListObject("CfgPlace", &apps)
+	return apps, err
+}
+
 func (c *Client) newRequest(method, path string, body interface{}) (*http.Request, error) {
 	rel := &url.URL{Path: path}
 	u := c.BaseURL.ResolveReference(rel)
@@ -105,10 +123,20 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	}).Debug("Executing request")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"Method": req.Method,
+			"Path":   req.URL.Path,
+			"Error":  err,
+		}).Debug("Request failed")
 		return nil, err
 	}
 	defer resp.Body.Close()
 
+	logrus.WithFields(logrus.Fields{
+		"Method": req.Method,
+		"Path":   req.URL.Path,
+		"Body":   resp.Body,
+	}).Debug("Request response")
 	err = json.NewDecoder(resp.Body).Decode(v)
 	return resp, err
 }

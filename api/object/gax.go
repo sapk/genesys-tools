@@ -20,6 +20,21 @@ type CfgObject struct {
 	Type string `json:"type"`
 }
 
+type CfgDN struct {
+	*CfgObject
+	//TODO
+}
+
+type CfgSwitch struct {
+	*CfgObject
+	//TODO
+}
+
+type CfgPlace struct {
+	*CfgObject
+	//TODO
+}
+
 type CfgHost struct {
 	*CfgObject
 	Ipaddress string `json:"ipaddress"`
@@ -96,9 +111,9 @@ type CfgApplication struct {
 	Port             string `json:"port"`
 }
 
+/*
 type CfgObjectList []CfgObject
 
-/*
 func (l CfgObjectList) Len() int      { return len(l) }
 func (l CfgObjectList) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
 func (l CfgObjectList) Less(i, j int) bool {
@@ -108,9 +123,9 @@ func (l CfgObjectList) Less(i, j int) bool {
 	return li < lj
 }
 */
+/*
 type CfgApplicationList []CfgApplication
 
-/*
 func (l CfgApplicationList) Len() int      { return len(l) }
 func (l CfgApplicationList) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
 func (l CfgApplicationList) Less(i, j int) bool {
@@ -120,6 +135,7 @@ func (l CfgApplicationList) Less(i, j int) bool {
 	return li < lj
 }
 */
+/*
 type CfgHostList []CfgHost
 
 /*

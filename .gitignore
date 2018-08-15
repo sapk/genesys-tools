@@ -1,6 +1,9 @@
 *.json
 Applications/
 Hosts/
+DNs/
+Places/
+Switchs/
 /genesys
 /genesys-tools
 /build
