@@ -38,7 +38,7 @@ var (
 //TODO manage switch/dn and agent and routing
 
 func init() {
-	dumpCmd.Flags().BoolVar(&dumpFull, "full", false, "[WIP] Get also switch, dn, person, place, ...")
+	dumpCmd.Flags().BoolVarP(&dumpFull, "extended", "e", false, "[WIP] Get also switch, dn, person, place, ...")
 	dumpCmd.Flags().BoolVar(&dumpNoJSON, "no-json", false, "Disable global json dump")
 	dumpCmd.Flags().BoolVar(&dumpOnlyJSON, "only-json", false, "Dump only global json")
 	dumpCmd.Flags().StringVarP(&dumpFromJSON, "from-json", "f", "", "Read data from JSON and not a live GAX (directory containing all json)")
