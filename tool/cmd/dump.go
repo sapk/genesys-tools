@@ -23,6 +23,7 @@ import (
 
 var (
 	dumpFull     bool
+	dumpZip      bool
 	dumpNoJSON   bool
 	dumpOnlyJSON bool
 	dumpFromJSON string
@@ -37,7 +38,6 @@ var (
 //TODO add follow folder structure for application
 //TODO manage multi-tenant
 //TODO manage switch/dn and agent and routing
-//TODO add --zip to package all output to zip
 //TODO add timeout to connection in app format
 //TODO export AgentGroup script
 //TODO dump log on as of application
@@ -47,12 +47,12 @@ var (
 
 func init() {
 	dumpCmd.Flags().BoolVarP(&dumpFull, "extended", "e", false, "[WIP] Get also switch, dn, person, place, ...")
+	dumpCmd.Flags().BoolVarP(&dumpZip, "zip", "z", false, "zip the output folder")
 	dumpCmd.Flags().BoolVar(&dumpNoJSON, "no-json", false, "Disable global json dump")
 	dumpCmd.Flags().BoolVar(&dumpOnlyJSON, "only-json", false, "Dump only global json")
 	dumpCmd.Flags().StringVarP(&dumpFromJSON, "from-json", "f", "", "Read data from JSON and not a live GAX (directory containing all json)")
 	dumpCmd.Flags().StringVarP(&dumpUsername, "user", "u", "default", "GAX user name")
 	dumpCmd.Flags().StringVarP(&dumpPassword, "pass", "p", "password", "GAX user password")
-	//TODO from-json
 	RootCmd.AddCommand(dumpCmd)
 }
 
@@ -153,6 +153,17 @@ var dumpCmd = &cobra.Command{
 							}
 						}
 					}
+				}
+			}
+			if dumpZip {
+				logrus.Infof("Compacting folder: %s", gax)
+				err := fs.RecursiveZip(gax, gax+".zip")
+				if err != nil {
+					logrus.Panicf("Failed to zip folder : %v", err)
+				}
+				err = fs.Clean(gax)
+				if err != nil {
+					logrus.Panicf("Clean up failed : %v", err)
 				}
 			}
 		}
