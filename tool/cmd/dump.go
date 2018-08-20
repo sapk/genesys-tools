@@ -115,6 +115,10 @@ var dumpCmd = &cobra.Command{
 			}
 			if !dumpOnlyJSON {
 				for _, objType := range list {
+					if !objType.IsDumpable {
+						continue //Skip
+					}
+					//TODO skip if empty array ?
 					outFolder := filepath.Join(gax, objType.Desc)
 					if _, err := os.Stat(outFolder); err == nil {
 						logrus.Warnf("Overwriting old export %s", outFolder)
