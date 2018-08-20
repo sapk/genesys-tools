@@ -1,6 +1,52 @@
 // Copyright © 2018 Antoine GIRARD <antoine.girard@sapk.fr>
 package object
 
+//FROM https://docs.genesys.com/Documentation/PSDK/9.0.x/ConfigLayerRef/CfgObjectType
+type ObjectType struct {
+	ID   int
+	Name string
+	Desc string
+}
+
+var ObjectTypeListShort = []ObjectType{
+	ObjectType{3, "CfgPerson", "Person"},
+	ObjectType{9, "CfgApplication", "Application"},
+	ObjectType{10, "CfgHost", "Host"},
+}
+var ObjectTypeList = []ObjectType{
+	ObjectType{1, "CfgSwitch", "Switch"},
+	ObjectType{2, "CfgDN", "DN"},
+	ObjectType{3, "CfgPerson", "Person"},
+	ObjectType{4, "CfgPlace", "Place"},
+	ObjectType{5, "CfgAgentGroup", "Agent Group"},
+	ObjectType{6, "CfgPlaceGroup", "Place Group"},
+	ObjectType{7, "CfgTenant", "Tenant"},
+	ObjectType{8, "CfgService", "Solution"},
+	ObjectType{9, "CfgApplication", "Application"},
+	ObjectType{10, "CfgHost", "Host"},
+	ObjectType{11, "CfgPhysicalSwitch", "Switching Office"},
+	ObjectType{12, "CfgScript", "Script"},
+	ObjectType{13, "CfgSkill", "Skill"},
+	ObjectType{14, "CfgActionCode", "Action Code"},
+	ObjectType{15, "CfgAgentLogin", "Agent Login"},
+	ObjectType{16, "CfgTransaction", "Transaction"},
+	ObjectType{17, "CfgDNGroup", "DN Group"},
+	ObjectType{18, "CfgStatDay", "Statistical Day"},
+	ObjectType{19, "CfgStatTable", "Statistical Table"},
+	ObjectType{20, "CfgAppPrototype", "Application Template"},
+	ObjectType{21, "CfgAccessGroup", "Access Group"},
+	ObjectType{22, "CfgFolder", "Folder"},
+	ObjectType{23, "CfgField", "Field"},
+	ObjectType{24, "CfgFormat", "Format"},
+	ObjectType{25, "CfgTableAccess", "Table Access"},
+	ObjectType{26, "CfgCallingList", "Calling List"},
+	ObjectType{27, "CfgCampaign", "Campaign"},
+	ObjectType{28, "CfgTreatment", "Treatment"},
+	ObjectType{29, "CfgFilter", "Filter"},
+	ObjectType{30, "CfgTimeZone", "Time Zone"},
+	ObjectType{31, "CfgVoicePrompt", "Voice Prompt"},
+}
+
 type LoginRequest struct {
 	Username            string `json:"username"`
 	Password            string `json:"password"`
