@@ -36,6 +36,13 @@ var (
 //TODO add follow folder structure for application
 //TODO manage multi-tenant
 //TODO manage switch/dn and agent and routing
+//TODO add --zip to package all output to zip
+//TODO add timeout to connection in app format
+//TODO export AgentGroup script
+//TODO dump log on as of application
+//TODO find a solution for applciation  like UCS that use port from config (annex [ports])
+//TODO dump object at end of file to re-import them back
+//TODO add exemple liek flowtester (and fix typo lister in flowtester)
 
 func init() {
 	dumpCmd.Flags().BoolVarP(&dumpFull, "extended", "e", false, "[WIP] Get also switch, dn, person, place, ...")
