@@ -61,7 +61,7 @@ func formatHostAppList(dbid string, data map[string][]interface{}) string {
 		connections := ""
 		for _, c := range app.Appservers.Conninfo {
 			if c.Appserverdbid != dbid {
-				connections += findApplicationName(c.Appserverdbid, data) + "/" + c.ID + "/" + c.Mode + ", "
+				connections += funcFindByType("CfgApplication")(c.Appserverdbid, data) + "/" + c.ID + "/" + c.Mode + ", "
 				//TODO find host of App
 			}
 		}

@@ -51,22 +51,25 @@ var keyInformations = []struct {
 	Name   string
 	Format func(string, map[string][]interface{}) string
 }{
+	//Generic
 	{"dbid", "DBID", nil},
-	{"hostdbid", "Host", findHostname},
+	{"tenantdbid", "Tenant", funcFindByType("CfgTenant")},
+	{"hostdbid", "Host", funcFindByType("CfgHost")},
 	{"type", "Type", nil},
 	{"subtype", "SubType", nil},
 	{"componenttype", "Componenttype", nil},
 	{"isserver", "Isserver", nil},
 	{"version", "Version", nil},
 	{"state", "State", nil},
-	{"folderid", "Folder", findFolder},
+	{"folderid", "Folder path", findFolderPath},
+	{"description", "Description", nil},
 	//Host
 	{"ipaddress", "Ipaddress", nil},
-	{"scsdbid", "SCS", findApplicationName},
+	{"scsdbid", "SCS", funcFindByType("CfgApplication")},
 	{"lcaport", "Lcaport", nil},
 	{"ostype", "Ostype", nil},
 	//App
-	{"appprototypedbid", "App Template", findApplicationTemplateName},
+	{"appprototypedbid", "App Template", funcFindByType("CfgAppPrototype")},
 	{"startuptype", "Startuptype", nil},
 	{"workdirectory", "Workdirectory", nil},
 	{"commandline", "Commandline", nil},
@@ -76,7 +79,7 @@ var keyInformations = []struct {
 	{"port", "Port principal", nil},
 	{"redundancytype", "Redundancytype", nil},
 	{"isprimary", "Isprimary", nil},
-	{"backupserverdbid", "Backup Server", findApplicationName},
+	{"backupserverdbid", "Backup Server", funcFindByType("CfgApplication")},
 	//TODO Add Host key inf and other
 }
 
@@ -105,7 +108,7 @@ func findObjName(t string, id string, data map[string][]interface{}) string {
 	return id
 }
 
-func findFolder(idFolder string, data map[string][]interface{}) string {
+func findFolderPath(idFolder string, data map[string][]interface{}) string {
 	f := findObj("CfgFolder", idFolder, data) //Chainload to have full path
 	if f == nil {
 		return idFolder
@@ -114,22 +117,17 @@ func findFolder(idFolder string, data map[string][]interface{}) string {
 	if ok {
 		parent, ok := f["folderid"].(string)
 		if ok {
-			return filepath.Join(findFolder(parent, data), name)
+			return filepath.Join(findFolderPath(parent, data), name)
 		}
-		return name
+		return "/" + name
 	}
 	return idFolder //Chainload to have full path
 }
 
-//TODO use a func fabric
-func findHostname(idHost string, data map[string][]interface{}) string {
-	return findObjName("CfgHost", idHost, data)
-}
-func findApplicationName(idApp string, data map[string][]interface{}) string {
-	return findObjName("CfgApplication", idApp, data)
-}
-func findApplicationTemplateName(idAppT string, data map[string][]interface{}) string {
-	return findObjName("CfgAppPrototype", idAppT, data)
+func funcFindByType(t string) func(string, map[string][]interface{}) string {
+	return func(id string, data map[string][]interface{}) string {
+		return findObjName(t, id, data)
+	}
 }
 
 func dumpAvailableInformation(obj map[string]interface{}, data map[string][]interface{}) string {

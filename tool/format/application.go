@@ -52,7 +52,7 @@ func formatApplication(obj map[string]interface{}, data map[string][]interface{}
 
 	connections := treemap.NewWithStringComparator()
 	for _, c := range app.Appservers.Conninfo {
-		connections.Put(findApplicationName(c.Appserverdbid, data), c.ID+" / "+c.Mode)
+		connections.Put(funcFindByType("CfgApplication")(c.Appserverdbid, data), c.ID+" / "+c.Mode)
 	}
 	connList := ""
 	for _, id := range connections.Keys() {

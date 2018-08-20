@@ -136,7 +136,7 @@ var dumpCmd = &cobra.Command{
 						logrus.Infof("%s: %s (%s)", objType.Name, obj["name"], obj["dbid"])
 						name, ok := obj["name"].(string)
 						if ok {
-							err = fs.WriteToFile(filepath.Join(outFolder, name+".md"), formatObj(objType, obj, data))
+							err = fs.WriteToFile(filepath.Join(outFolder, obj["dbid"].(string)+"-"+name+".md"), formatObj(objType, obj, data))
 							if err != nil {
 								logrus.Panicf("File creation failed : %v", err)
 							}
@@ -144,7 +144,7 @@ var dumpCmd = &cobra.Command{
 							//Second try with username (default user)
 							name, ok := obj["username"].(string)
 							if ok {
-								err = fs.WriteToFile(filepath.Join(outFolder, name+".md"), formatObj(objType, obj, data))
+								err = fs.WriteToFile(filepath.Join(outFolder, obj["dbid"].(string)+"-"+name+".md"), formatObj(objType, obj, data))
 								if err != nil {
 									logrus.Panicf("File creation failed : %v", err)
 								}
