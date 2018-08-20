@@ -4,6 +4,7 @@ package format
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/emirpasic/gods/maps/treemap"
@@ -111,6 +112,10 @@ func findFolder(idFolder string, data map[string][]interface{}) string {
 	}
 	name, ok := f["name"].(string)
 	if ok {
+		parent, ok := f["folderid"].(string)
+		if ok {
+			return filepath.Join(findFolder(parent, data), name)
+		}
 		return name
 	}
 	return idFolder //Chainload to have full path
