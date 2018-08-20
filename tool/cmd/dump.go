@@ -171,7 +171,7 @@ func getJSONData(dumpFromJSON string, gax string, list []object.ObjectType) map[
 	for _, objType := range list {
 		//Get objects
 		var data []interface{}
-		bytes, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, gax, objType.Name+".json"))
+		bytes, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, gax, objType.Desc+".json"))
 		if err != nil {
 			logrus.Warnf("List %s failed : %v", objType.Name, err)
 		}
