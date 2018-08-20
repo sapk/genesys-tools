@@ -53,7 +53,6 @@ func init() {
 	RootCmd.AddCommand(dumpCmd)
 }
 
-// listCmd represents the list command
 var dumpCmd = &cobra.Command{
 	Use:   "dump",
 	Short: "Connect to a GAX server to dump its state",

@@ -2,6 +2,7 @@
 package check
 
 import (
+	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
@@ -57,4 +58,22 @@ func IsValidClientArg(arg string) bool {
 	}).Debug("parsing arg")
 	_, err := strconv.Atoi(port)
 	return err == nil && (IsIP(host) || IsHost(host))
+}
+
+func IsValidFileArg(arg string) bool {
+	/*
+		file, err := os.Stat(arg)
+		if err != nil {
+			return false //Failed to open file
+		}
+		if !file.Mode().IsRegular() {
+			return false //Is not a file
+		}
+	*/
+	b, err := ioutil.ReadFile(arg)
+	if err != nil {
+		return false
+	}
+	//check whether s contains md comment with json //TODO regex
+	return strings.Contains(string(b), "[//]: # ({")
 }
