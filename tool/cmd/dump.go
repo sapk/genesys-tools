@@ -17,6 +17,7 @@ import (
 	"github.com/sapk/go-genesys/api/client"
 	"github.com/sapk/go-genesys/api/object"
 	"github.com/sapk/go-genesys/tool/check"
+	"github.com/sapk/go-genesys/tool/format"
 	"github.com/sapk/go-genesys/tool/fs"
 )
 
@@ -150,76 +151,6 @@ var dumpCmd = &cobra.Command{
 					}
 				}
 			}
-
-			/*
-				if !dumpOnlyJSON { //Don't analyze data
-					err := clean("Hosts", "Applications", "Switchs", "DNs", "Places")
-					if err != nil {
-						logrus.Panicf("Clean up failed : %v", err)
-					}
-					err = os.Mkdir("Hosts", 0755)
-					if err != nil {
-						logrus.Panicf("Folder creation failed : %v", err)
-					}
-					err = os.Mkdir("Applications", 0755)
-					if err != nil {
-						logrus.Panicf("Folder creation failed : %v", err)
-					}
-					if dumpFull {
-						//TODO inprove by refactor repetive code
-						err = os.Mkdir("Switchs", 0755)
-						if err != nil {
-							logrus.Panicf("Folder creation failed : %v", err)
-						}
-						err = os.Mkdir("DNs", 0755)
-						if err != nil {
-							logrus.Panicf("Folder creation failed : %v", err)
-						}
-						err = os.Mkdir("Places", 0755)
-						if err != nil {
-							logrus.Panicf("Folder creation failed : %v", err)
-						}
-					}
-					for _, host := range hosts {
-						logrus.Infof("Host: %s (%s)", host.Name, host.Dbid)
-						err = writeToFile(filepath.Join("Hosts", host.Name+".md"), formatHost(host, apps))
-						if err != nil {
-							logrus.Panicf("File creation failed : %v", err)
-						}
-					}
-					for _, app := range apps {
-						logrus.Infof("App: %s (%s)", app.Name, app.Dbid)
-						err = writeToFile(filepath.Join("Applications", app.Name+".md"), formatApplication(app, apps, hosts))
-						if err != nil {
-							logrus.Panicf("File creation failed : %v", err)
-						}
-					}
-					if dumpFull {
-						//TODO inprove by refactor repetive code
-						for _, s := range switchs {
-							logrus.Infof("Switch: %s (%s)", s.Name, s.Dbid)
-							err = writeToFile(filepath.Join("Switchs", s.Name+".md"), formatSwitch(s))
-							if err != nil {
-								logrus.Panicf("File creation failed : %v", err)
-							}
-						}
-						for _, d := range dns {
-							logrus.Infof("DN: %s (%s)", d.Name, d.Dbid)
-							err = writeToFile(filepath.Join("DNs", d.Name+".md"), formatDN(d))
-							if err != nil {
-								logrus.Panicf("File creation failed : %v", err)
-							}
-						}
-						for _, p := range places {
-							logrus.Infof("Place: %s (%s)", p.Name, p.Dbid)
-							err = writeToFile(filepath.Join("Places", p.Name+".md"), formatPlace(p))
-							if err != nil {
-								logrus.Panicf("File creation failed : %v", err)
-							}
-						}
-					}
-				}
-			*/
 		}
 	},
 }
@@ -276,8 +207,13 @@ func getGAXData(gax string, list []object.ObjectType) map[string][]interface{} {
 	}
 	return res
 }
+
+//Call the good formatter if exist or use the default
 func formatObj(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
-	return "TODO"
+	if f, ok := format.FormaterList[objType.Name]; ok {
+		return f.Format(objType, obj, data)
+	}
+	return format.FormaterList["default"].Format(objType, obj, data)
 }
 
 /*
@@ -473,25 +409,6 @@ func formatHost(host object.CfgHost, apps []object.CfgApplication) string {
 
 	ret += "## [WIP] Connection with (client with connection outside): \n"
 	ret += connListTxt
-	ret += "\n"
-
-	return ret
-}
-
-func formatSwitch(s object.CfgSwitch) string {
-	ret := "# " + s.Name + "\n"
-	ret += "\n"
-
-	return ret
-}
-func formatDN(d object.CfgDN) string {
-	ret := "# " + d.Name + "\n"
-	ret += "\n"
-
-	return ret
-}
-func formatPlace(p object.CfgPlace) string {
-	ret := "# " + p.Name + "\n"
 	ret += "\n"
 
 	return ret
