@@ -235,78 +235,8 @@ func formatObj(objType object.ObjectType, obj map[string]interface{}, data map[s
 
 //TODO order applications conn and port
 func formatApplication(app object.CfgApplication, apps []object.CfgApplication, hosts []object.CfgHost) string {
-	ret := "# " + app.Name + "\n"
-	ret += "\n"
-	ret += "## Informations: \n"
-	ret += " Dbid: " + app.Dbid + "\n"
-	ret += " Name: " + app.Name + "\n"
-	host := app.Hostdbid
-	for _, h := range hosts {
-		if app.Hostdbid == h.Dbid {
-			host = h.Name
-			break
-		}
-	}
-	ret += " Host: " + host + "\n"
-	ret += " Type: " + app.Type + "\n"
-	ret += " Subtype: " + app.Subtype + "\n"
-	ret += " Componenttype: " + app.Componenttype + "\n"
-	ret += " Appprototypedbid: " + app.Appprototypedbid + "\n" //TODO
-	ret += " Isserver: " + app.Isserver + "\n"
-	ret += " Version: " + app.Version + "\n"
-	ret += " State: " + app.State + "\n"
-	ret += " Startuptype: " + app.Startuptype + "\n"
-	ret += " Workdirectory: " + app.Workdirectory + "\n"
-	ret += " Commandline: " + app.Commandline + "\n"
-	ret += " Commandlinearguments: " + app.Commandlinearguments + "\n"
-	ret += " Autorestart: " + app.Autorestart + "\n"
-	ret += " Port principal: " + app.Port + "\n"
-	ret += " Redundancytype: " + app.Redundancytype + "\n"
-	ret += " Isprimary: " + app.Isprimary + "\n"
-	backup := app.Backupserverdbid
-	for _, a := range apps {
-		if app.Backupserverdbid == a.Dbid {
-			backup = a.Name
-			break
-		}
-	}
-	ret += " Backupserver: " + backup + "\n"
-	ret += "\n"
 
-	ports := treemap.NewWithStringComparator() //TODO pass to int comparator ?
-	for _, p := range app.Portinfos.Portinfo {
-		ports.Put(p.Port, p.ID)
-	}
-	portList := ""
-	for _, id := range ports.Keys() {
-		port := id.(string)
-		val, _ := ports.Get(port)
-		portList += "  " + val.(string) + " / " + port + "\n"
-	}
-	ret += fmt.Sprintf("## Listening ports (%d): \n", ports.Size())
-	ret += portList
-	ret += "\n"
 
-	connections := treemap.NewWithStringComparator()
-	for _, c := range app.Appservers.Conninfo {
-		appserv := c.Appserverdbid
-		for _, a := range apps {
-			if c.Appserverdbid == a.Dbid {
-				appserv = a.Name
-				break
-			}
-		}
-		connections.Put(appserv, c.ID+" / "+c.Mode)
-	}
-	connList := ""
-	for _, id := range connections.Keys() {
-		appName := id.(string)
-		val, _ := connections.Get(appName)
-		connList += "  " + appName + " / " + val.(string) + "\n"
-	}
-	ret += fmt.Sprintf("## Connections (%d): \n", connections.Size())
-	ret += connList
-	ret += "\n"
 
 	sections := treeset.NewWithStringComparator()
 	options := make(map[string]*treemap.Map)
@@ -358,74 +288,6 @@ func formatApplication(app object.CfgApplication, apps []object.CfgApplication, 
 	ret += fmt.Sprintf("## Annexes (%d): \n", strings.Count(annexList, "\n")-sectionsAnnex.Size())
 	ret += annexList
 	ret += "\n"
-	return ret
-}
-
-func formatHost(host object.CfgHost, apps []object.CfgApplication) string {
-	ret := "# " + host.Name + "\n"
-	ret += "\n"
-
-	ret += "## Informations: \n"
-	ret += " Dbid: " + host.Dbid + "\n"
-	ret += " Name: " + host.Name + "\n"
-	ret += " Type: " + host.Type + "\n"
-	ret += " Subtype: " + host.Subtype + "\n"
-	ret += " OS: " + host.Ostype + "\n"
-	ret += " State: " + host.State + "\n"
-	ret += " IP: " + host.Ipaddress + "\n"
-	ret += "\n"
-
-	appList := treemap.NewWithStringComparator()
-	for _, app := range apps {
-		if app.Hostdbid == host.Dbid {
-			appList.Put(app.Name, app)
-		}
-	}
-	appListTxt := ""
-	portListTxt := ""
-	connListTxt := ""
-	for _, id := range appList.Keys() {
-		appName := id.(string)
-		obj, _ := appList.Get(appName)
-		app := obj.(object.CfgApplication)
-		appListTxt += " - " + appName + "\n"
-		ports := ""
-		for _, port := range app.Portinfos.Portinfo {
-			ports += port.ID + "/" + port.Port + ", "
-		}
-		if len(ports) > 2 {
-			portListTxt += " - " + appName + " (" + ports[:len(ports)-2] + ")\n"
-		}
-		connections := ""
-		for _, c := range app.Appservers.Conninfo {
-			if c.Appserverdbid != host.Dbid {
-				appserv := c.Appserverdbid
-				for _, a := range apps {
-					if c.Appserverdbid == a.Dbid {
-						appserv = a.Name
-						break
-					}
-				}
-				connections += appserv + "/" + c.ID + "/" + c.Mode + ", "
-			}
-		}
-		//TODO handle link with backup
-		if len(connections) > 2 {
-			connListTxt += " - " + appName + " -> (" + connections[:len(connections)-2] + ")\n"
-		}
-	}
-	ret += fmt.Sprintf("## Applications (%d): \n", appList.Size())
-	ret += appListTxt
-	ret += "\n"
-
-	ret += "## Listening ports (all applications): \n"
-	ret += portListTxt
-	ret += "\n"
-
-	ret += "## [WIP] Connection with (client with connection outside): \n"
-	ret += connListTxt
-	ret += "\n"
-
 	return ret
 }
 */

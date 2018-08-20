@@ -107,6 +107,20 @@ type CfgHost struct {
 	State     string `json:"state"`
 	Folderid  string `json:"folderid"`
 }
+type Userproperties struct {
+	Property []struct {
+		Section string `json:"section"`
+		Value   string `json:"value"`
+		Key     string `json:"key"`
+	} `json:"property"`
+}
+type Options struct {
+	Property []struct {
+		Section string `json:"section"`
+		Value   string `json:"value"`
+		Key     string `json:"key"`
+	} `json:"property"`
+}
 
 type CfgApplication struct {
 	*CfgObject
@@ -123,30 +137,18 @@ type CfgApplication struct {
 			ID            string `json:"id"`
 		} `json:"conninfo"`
 	} `json:"appservers"`
-	Autorestart    string `json:"autorestart"`
-	Userproperties struct {
-		Property []struct {
-			Section string `json:"section"`
-			Value   string `json:"value"`
-			Key     string `json:"key"`
-		} `json:"property"`
-	} `json:"userproperties"`
-	Timeout              string `json:"timeout"`
-	Commandline          string `json:"commandline"`
-	Folderid             string `json:"folderid"`
-	Commandlinearguments string `json:"commandlinearguments"`
-	Subtype              string `json:"subtype"`
-	Options              struct {
-		Property []struct {
-			Section string `json:"section"`
-			Value   string `json:"value"`
-			Key     string `json:"key"`
-		} `json:"property"`
-	} `json:"options"`
-	State     string `json:"state"`
-	Hostdbid  string `json:"hostdbid"`
-	Attempts  string `json:"attempts"`
-	Portinfos struct {
+	Autorestart          string         `json:"autorestart"`
+	Userproperties       Userproperties `json:"userproperties"`
+	Timeout              string         `json:"timeout"`
+	Commandline          string         `json:"commandline"`
+	Folderid             string         `json:"folderid"`
+	Commandlinearguments string         `json:"commandlinearguments"`
+	Subtype              string         `json:"subtype"`
+	Options              Options        `json:"options"`
+	State                string         `json:"state"`
+	Hostdbid             string         `json:"hostdbid"`
+	Attempts             string         `json:"attempts"`
+	Portinfos            struct {
 		Portinfo []struct {
 			Longfield1 string `json:"longfield1"`
 			Longfield2 string `json:"longfield2"`
