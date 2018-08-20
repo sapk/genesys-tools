@@ -2,7 +2,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"strings"
 
 	"github.com/sapk/go-genesys/tool/check"
 	"github.com/sirupsen/logrus"
@@ -41,5 +44,40 @@ var importCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		gax := args[0]
+		logrus.Debugln(gax)
+		for _, file := range args[1:] {
+			o := getObj(file)
+			logrus.Debugln(o)
+		}
 	},
+}
+
+func getObj(file string) map[string]interface{} {
+	b, err := ioutil.ReadFile(file)
+	if err != nil {
+		logrus.Fatalf("Read file %s failed : %v", file, err)
+	}
+	fileStr := string(b)
+
+	pos := strings.LastIndex(fileStr, "[//]: # ({")
+	if pos == -1 {
+		logrus.Fatalf("Fail to found raw dump in file %s : %v", file, err)
+	}
+	jsonStr := fileStr[pos+9:]
+
+	//TODO regex
+	pos = strings.Index(jsonStr, "})\n")
+	if pos == -1 {
+		logrus.Fatalf("Fail to found raw dump in file %s : %v", file, err)
+	}
+	jsonStr = jsonStr[:pos+1]
+	logrus.Debugf("Parsing JSON : %s", jsonStr)
+
+	var data map[string]interface{}
+	err = json.Unmarshal([]byte(jsonStr), &data)
+	if err != nil {
+		logrus.Fatalf("Fail failed to parse %s : %v", jsonStr, err)
+	}
+	return data
 }

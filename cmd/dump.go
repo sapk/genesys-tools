@@ -40,7 +40,9 @@ var (
 //TODO manage switch/dn and agent and routing
 //TODO add timeout to connection in app format
 //TODO find a solution for applciation  like UCS that use port from config (annex [ports])
-//TODO add exemple liek flowtester (and fix typo lister in flowtester)
+//TODO list agent in agent Group
+//TODO list skils of Agent
+//TODO add a timer of 6 month of end of life
 
 func init() {
 	dumpCmd.Flags().BoolVarP(&dumpFull, "extended", "e", false, "[WIP] Get also switch, dn, person, place, ...")
