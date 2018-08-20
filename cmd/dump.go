@@ -39,10 +39,7 @@ var (
 //TODO manage multi-tenant
 //TODO manage switch/dn and agent and routing
 //TODO add timeout to connection in app format
-//TODO export AgentGroup script
-//TODO dump log on as of application
 //TODO find a solution for applciation  like UCS that use port from config (annex [ports])
-//TODO dump object at end of file to re-import them back
 //TODO add exemple liek flowtester (and fix typo lister in flowtester)
 
 func init() {
@@ -60,6 +57,9 @@ func init() {
 var dumpCmd = &cobra.Command{
 	Use:   "dump",
 	Short: "Connect to a GAX server to dump its state",
+	Long: `Use GAX APIs to get all objects from config server.
+This command can dump multiple gax at a time. One folder for each GAX is created.
+	Ex:  genesys-tools dump 172.18.0.5:8080 hosta hostb:4242`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		logrus.Debug("Checking args for list cmd: ", args)
 		if len(args) > 1 {
