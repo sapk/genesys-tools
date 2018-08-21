@@ -84,12 +84,12 @@ func formatPersonList(list object.CfgDBIDList, data map[string][]interface{}) (s
 			err := mapstructure.Decode(val, &user)
 			if err != nil {
 				logrus.Warnf("Fail to convert to CfgPerson")
-				userList += "  " + username + "\n"
+				userList += "  dbid:" + username + "\n"
 			} else {
 				userList += "  " + user.Username + " / " + user.Firstname + " " + user.Lastname + " (" + user.Employeeid + "/" + user.Dbid + ")\n"
 			}
 		} else {
-			userList += "  " + username + "\n"
+			userList += "  dbid:" + username + "\n"
 		}
 	}
 	return userList, users.Size()

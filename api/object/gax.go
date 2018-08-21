@@ -98,6 +98,48 @@ type CfgPlace struct {
 	//TODO
 }
 */
+type CfgDN struct {
+	Accessnumbers struct {
+		Dnaccessnumber []interface{} `json:"dnaccessnumber"`
+	} `json:"accessnumbers"`
+	Contractdbid       string `json:"contractdbid"`
+	Dbid               string `json:"dbid"`
+	Folderid           string `json:"folderid"`
+	Groupdbid          string `json:"groupdbid"`
+	Loginflag          string `json:"loginflag"`
+	Number             string `json:"number"`
+	Registerall        string `json:"registerall"`
+	Routetype          string `json:"routetype"`
+	Sitedbid           string `json:"sitedbid"`
+	State              string `json:"state"`
+	Subtype            string `json:"subtype"`
+	Switchdbid         string `json:"switchdbid"`
+	Switchspecifictype string `json:"switchspecifictype"`
+	Tenantdbid         string `json:"tenantdbid"`
+	Trunks             string `json:"trunks"`
+	Type               string `json:"type"`
+	Useoverride        string `json:"useoverride"`
+}
+type CfgDNGroup struct {
+	Capacityruledbid  string `json:"capacityruledbid"`
+	Capacitytabledbid string `json:"capacitytabledbid"`
+	Contractdbid      string `json:"contractdbid"`
+	Dbid              string `json:"dbid"`
+	DNS               struct {
+		Dninfo []struct {
+			Dndbid string `json:"dndbid"`
+			Trunks string `json:"trunks"`
+		} `json:"dninfo"`
+	} `json:"dns"`
+	Folderid       string `json:"folderid"`
+	Name           string `json:"name"`
+	Quotatabledbid string `json:"quotatabledbid"`
+	Sitedbid       string `json:"sitedbid"`
+	State          string `json:"state"`
+	Subtype        string `json:"subtype"`
+	Tenantdbid     string `json:"tenantdbid"`
+	Type           string `json:"type"`
+}
 
 type CfgDBIDList []struct {
 	Dbid string `json:"dbid"`

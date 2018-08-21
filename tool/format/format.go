@@ -54,6 +54,9 @@ var keyInformations = []struct {
 	{"state", "State", nil},
 	{"folderid", "Folder path", findFolderPath},
 	{"description", "Description", nil},
+	//DN
+	{"number", "Number", nil},
+	{"switchdbid", "Switch", funcFindByType("CfgSwitch")},
 	//Person
 	{"firstname", "Firstname", nil},
 	{"lastname", "Lastname", nil},
