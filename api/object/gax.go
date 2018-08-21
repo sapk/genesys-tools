@@ -82,6 +82,7 @@ type CfgObject struct {
 	Type string `json:"type"`
 }
 
+/*
 type CfgDN struct {
 	*CfgObject
 	//TODO
@@ -96,7 +97,7 @@ type CfgPlace struct {
 	*CfgObject
 	//TODO
 }
-
+*/
 type CfgHost struct {
 	*CfgObject
 	Ipaddress string `json:"ipaddress"`

@@ -199,7 +199,7 @@ func getJSONData(dumpFromJSON string, gax string, list []object.ObjectType) map[
 func getGAXData(gax string, list []object.ObjectType) map[string][]interface{} {
 	if !strings.Contains(gax, ":") {
 		//By default use port 8080
-		gax += "8080"
+		gax += ":8080"
 	}
 	//Login
 	c := client.NewClient(gax)

@@ -58,6 +58,7 @@ func (c *Client) ListObject(t string, v interface{}) (*http.Response, error) {
 	return c.do(req, v)
 }
 
+/*
 func (c *Client) ListApplication() ([]object.CfgApplication, error) {
 	var apps []object.CfgApplication
 	_, err := c.ListObject("CfgApplication", &apps)
@@ -87,6 +88,7 @@ func (c *Client) ListPlace() ([]object.CfgPlace, error) {
 	_, err := c.ListObject("CfgPlace", &apps)
 	return apps, err
 }
+*/
 
 func (c *Client) newRequest(method, path string, body interface{}) (*http.Request, error) {
 	rel := &url.URL{Path: path}
@@ -118,6 +120,7 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	logrus.WithFields(logrus.Fields{
 		"Method":  req.Method,
 		"Path":    req.URL.Path,
+		"Query":   req.URL.RawQuery,
 		"Cookies": req.Cookies(),
 		"Body":    req.Body,
 	}).Debug("Executing request")
