@@ -32,18 +32,6 @@ var FormaterList = map[string]Formater{
 			return ret
 		},
 	},
-	"CfgPerson": Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
-			ret := "# " + obj["username"].(string) + "\n"
-			ret += "\n"
-
-			ret += dumpAvailableInformation(obj, data) + "\n"
-			ret += formatOptions(obj, data)
-			ret += formatAnnexes(obj, data)
-			ret += dumpBackup(obj)
-			return ret
-		},
-	},
 }
 
 var keyInformations = []struct {
@@ -53,6 +41,9 @@ var keyInformations = []struct {
 }{
 	//Generic
 	{"dbid", "DBID", nil},
+	{"name", "Name", nil},
+	//In case of Person
+	{"username", "Username", nil},
 	{"tenantdbid", "Tenant", funcFindByType("CfgTenant")},
 	{"hostdbid", "Host", funcFindByType("CfgHost")},
 	{"type", "Type", nil},
@@ -63,6 +54,17 @@ var keyInformations = []struct {
 	{"state", "State", nil},
 	{"folderid", "Folder path", findFolderPath},
 	{"description", "Description", nil},
+	//Person
+	{"firstname", "Firstname", nil},
+	{"lastname", "Lastname", nil},
+	{"employeeid", "Employeeid", nil},
+	{"isagent", "IsAgent", nil},
+	{"isexternalauth", "IsExternalAuth", nil},
+	{"sitedbid", "Site", funcFindByType("CfgTenant")},
+	{"placedbid", "Place", funcFindByType("CfgPlace")},
+	{"capacityruledbid", "Capacity Rule", funcFindByType("CfgScript")}, //type=CfgScript&subtype=CFGCapacityRule
+	//TODO capacitytabledbid & quotatabledbid for Agent Group
+	{"contractdbid", "Contract", funcFindByType("CfgObjectiveTable")}, //type=CfgObjectiveTable&subtype=CFGOTTCostContract
 	//Host
 	{"ipaddress", "Ipaddress", nil},
 	{"scsdbid", "SCS", funcFindByType("CfgApplication")},

@@ -98,6 +98,69 @@ type CfgPlace struct {
 	//TODO
 }
 */
+
+type CfgDBIDList []struct {
+	Dbid string `json:"dbid"`
+	Type string `json:"type,omitempty"`
+}
+
+type CfgAccessGroup struct {
+	Capacityruledbid  string `json:"capacityruledbid"`
+	Capacitytabledbid string `json:"capacitytabledbid"`
+	Contractdbid      string `json:"contractdbid"`
+	Dbid              string `json:"dbid"`
+	Folderid          string `json:"folderid"`
+	Memberids         struct {
+		Idtype CfgDBIDList `json:"idtype"`
+	} `json:"memberids"`
+	Name           string `json:"name"`
+	Quotatabledbid string `json:"quotatabledbid"`
+	Sitedbid       string `json:"sitedbid"`
+	State          string `json:"state"`
+	Subtype        string `json:"subtype"`
+	Tenantdbid     string `json:"tenantdbid"`
+	Type           string `json:"type"`
+}
+type CfgAgentGroup struct {
+	Agentdbids struct {
+		ID CfgDBIDList `json:"id"`
+	} `json:"agentdbids"`
+	Capacityruledbid  string `json:"capacityruledbid"`
+	Capacitytabledbid string `json:"capacitytabledbid"`
+	Contractdbid      string `json:"contractdbid"`
+	Dbid              string `json:"dbid"`
+	Folderid          string `json:"folderid"`
+	Managerdbids      struct {
+		ID CfgDBIDList `json:"id"`
+	} `json:"managerdbids"`
+	Name           string `json:"name"`
+	Quotatabledbid string `json:"quotatabledbid"`
+	Sitedbid       string `json:"sitedbid"`
+	State          string `json:"state"`
+	Tenantdbid     string `json:"tenantdbid"`
+	Type           string `json:"type"`
+}
+
+type CfgPerson struct {
+	Appranks struct {
+		Apprank []interface{} `json:"apprank"`
+	} `json:"appranks"`
+	Changepasswordonnextlogin string         `json:"changepasswordonnextlogin"`
+	Dbid                      string         `json:"dbid"`
+	Employeeid                string         `json:"employeeid"`
+	Firstname                 string         `json:"firstname"`
+	Folderid                  string         `json:"folderid"`
+	Isagent                   string         `json:"isagent"`
+	Isexternalauth            string         `json:"isexternalauth"`
+	Lastname                  string         `json:"lastname"`
+	Password                  string         `json:"password"`
+	State                     string         `json:"state"`
+	Tenantdbid                string         `json:"tenantdbid"`
+	Type                      string         `json:"type"`
+	Username                  string         `json:"username"`
+	Userproperties            Userproperties `json:"userproperties"`
+}
+
 type CfgHost struct {
 	*CfgObject
 	Ipaddress string `json:"ipaddress"`
@@ -175,41 +238,3 @@ type CfgApplication struct {
 	Appprototypedbid string `json:"appprototypedbid"`
 	Port             string `json:"port"`
 }
-
-/*
-type CfgObjectList []CfgObject
-
-func (l CfgObjectList) Len() int      { return len(l) }
-func (l CfgObjectList) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
-func (l CfgObjectList) Less(i, j int) bool {
-	li := l[i].Name
-	lj := l[j].Name
-	//log.Debugf("Comparing %s < %s", ai, aj, ai < aj)
-	return li < lj
-}
-*/
-/*
-type CfgApplicationList []CfgApplication
-
-func (l CfgApplicationList) Len() int      { return len(l) }
-func (l CfgApplicationList) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
-func (l CfgApplicationList) Less(i, j int) bool {
-	li := l[i].Name
-	lj := l[j].Name
-	//log.Debugf("Comparing %s < %s", ai, aj, ai < aj)
-	return li < lj
-}
-*/
-/*
-type CfgHostList []CfgHost
-
-/*
-func (l CfgHostList) Len() int      { return len(l) }
-func (l CfgHostList) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
-func (l CfgHostList) Less(i, j int) bool {
-	li := l[i].Name
-	lj := l[j].Name
-	//log.Debugf("Comparing %s < %s", ai, aj, ai < aj)
-	return li < lj
-}
-*/
