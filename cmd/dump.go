@@ -137,6 +137,8 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 						logrus.Infof("%s: %s (%s)", objType.Name, obj["name"], obj["dbid"])
 						name, ok := obj["name"].(string)
 						if ok {
+							name = strings.Replace(name, "/", " - ", -1)
+							name = strings.Replace(name, "\\", " - ", -1)
 							err = fs.WriteToFile(filepath.Join(outFolder, obj["dbid"].(string)+"-"+name+".md"), formatObj(objType, obj, data))
 							if err != nil {
 								logrus.Panicf("File creation failed : %v", err)
@@ -145,6 +147,8 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 							//Second try with username (default user)
 							name, ok := obj["username"].(string)
 							if ok {
+								name = strings.Replace(name, "/", " - ", -1)
+								name = strings.Replace(name, "\\", " - ", -1)
 								err = fs.WriteToFile(filepath.Join(outFolder, obj["dbid"].(string)+"-"+name+".md"), formatObj(objType, obj, data))
 								if err != nil {
 									logrus.Panicf("File creation failed : %v", err)
