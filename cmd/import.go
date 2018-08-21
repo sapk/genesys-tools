@@ -9,6 +9,7 @@ import (
 
 	"github.com/sapk/go-genesys/api/client"
 	"github.com/sapk/go-genesys/tool/check"
+	"github.com/sapk/go-genesys/tool/loader"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -18,9 +19,12 @@ var (
 	importPassword string
 )
 var allowedImportTypes = map[string]bool{
-	"CfgApplication": true,
+	//"CfgApplication":  true,
+	"CfgAppPrototype": true,
 }
 
+//TODO importe template and metadata first
+//TODO afficher les connection et lien manquant , host, ...
 func init() {
 	importCmd.Flags().StringVarP(&importUsername, "user", "u", "default", "GAX user name")
 	importCmd.Flags().StringVarP(&importPassword, "pass", "p", "password", "GAX user password")
@@ -93,6 +97,7 @@ var importCmd = &cobra.Command{
 					}
 				}
 				//TODO less ugly
+				//TODO manage errors
 				switch len(list) {
 				case 0: //no same object so we create
 					createObj(c, obj)
@@ -131,31 +136,40 @@ func MatchIdName(src, dst map[string]interface{}) bool { //TODO Manage Person (u
 	return MatchName(src, dst) && MatchId(src, dst)
 }
 
-func cleanObj(obj map[string]interface{}, ids ...string) {
-	for _, id := range ids {
-		_, ok := obj[id]
-		if ok {
-			delete(obj, id)
-		}
-	}
-}
 func updateObj(c *client.Client, src map[string]interface{}, obj map[string]interface{}) error {
+	logrus.WithFields(logrus.Fields{
+		"Source": src,
+		"Object": obj,
+	}).Debugf("Update object")
+	if f, ok := loader.LoaderList[obj["type"].(string)]; ok {
+		obj = f.FormatUpdate(c, src, obj)
+	} else {
+		obj = loader.LoaderList["default"].FormatUpdate(c, src, obj)
+	}
+	logrus.WithFields(logrus.Fields{
+		"Object": obj,
+	}).Debugf("Sending updated object")
 	//TODO ask for ovveride
-	//Remove DBID since we create a new object
-	//cleanObj(obj, "dbid", "hostdbid")
 	//TODO get dbid for older one ?
 	//TODO check possible deps
 	//TODO check if no change
-	logrus.Debugf("Update object : %v", src)
-	logrus.Debugf("To : %v", obj)
-	return nil
+	_, err := c.UpdateObject(src["type"].(string), src["dbid"].(string), obj) //TODO check up
+	return err
 }
 func createObj(c *client.Client, obj map[string]interface{}) error {
-	//Remove DBID since we create a new object
-	cleanObj(obj, "dbid", "hostdbid")
-	logrus.Debugf("Create object : %v", obj)
-	//TODO check possible deps
-	return nil
+	logrus.WithFields(logrus.Fields{
+		"Object": obj,
+	}).Debugf("Create object")
+	if f, ok := loader.LoaderList[obj["type"].(string)]; ok {
+		obj = f.FormatCreate(c, obj)
+	} else {
+		obj = loader.LoaderList["default"].FormatCreate(c, obj)
+	}
+	logrus.WithFields(logrus.Fields{
+		"Object": obj,
+	}).Debugf("Sending new object")
+	_, err := c.PostObject(obj) //TODO check up
+	return err
 }
 
 func getObj(file string) map[string]interface{} {

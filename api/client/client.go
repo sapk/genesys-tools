@@ -4,6 +4,7 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
@@ -47,6 +48,22 @@ func (c *Client) Login(user, pass string) (*object.LoginResponse, error) {
 	var u object.LoginResponse
 	_, err = c.do(req, &u)
 	return &u, err
+}
+
+func (c *Client) UpdateObject(t, id string, v interface{}) (*http.Response, error) {
+	req, err := c.newRequest("PUT", fmt.Sprintf("cfg/objects/%s/%s", t, id), v)
+	if err != nil {
+		return nil, err
+	}
+	return c.do(req, v)
+}
+
+func (c *Client) PostObject(v interface{}) (*http.Response, error) {
+	req, err := c.newRequest("POST", "cfg/objects", v)
+	if err != nil {
+		return nil, err
+	}
+	return c.do(req, v)
 }
 
 func (c *Client) ListObject(t string, v interface{}) (*http.Response, error) {
