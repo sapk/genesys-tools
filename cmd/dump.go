@@ -80,19 +80,19 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, gax := range args {
-
+			gaxFolder := strings.Replace(gax, ":", "-", -1)
 			//tmp := strings.Split(gax, ":")
 			//host := tmp[0]
 			logrus.Infof("Get info from GAX: %s", gax)
 			if dumpFromJSON == "" { //Create folder if not from restore
-				if _, err := os.Stat(gax); err == nil {
-					logrus.Warnf("Overwriting old export %s", gax)
-					err = fs.Clean(gax)
+				if _, err := os.Stat(gaxFolder); err == nil {
+					logrus.Warnf("Overwriting old export %s", gaxFolder)
+					err = fs.Clean(gaxFolder)
 					if err != nil {
 						logrus.Panicf("Clean up failed : %v", err)
 					}
 				}
-				err := os.Mkdir(gax, 0755)
+				err := os.Mkdir(gaxFolder, 0755)
 				if err != nil {
 					logrus.Panicf("Folder creation failed : %v", err)
 				}
@@ -108,7 +108,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 
 			if !dumpNoJSON && dumpFromJSON == "" {
 				for _, objType := range list {
-					err := fs.DumpToFile(filepath.Join(gax, objType.Desc+".json"), data[objType.Name])
+					err := fs.DumpToFile(filepath.Join(gaxFolder, objType.Desc+".json"), data[objType.Name])
 					if err != nil {
 						logrus.Panicf("Dump failed : %v", err)
 					}
@@ -120,7 +120,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 						continue //Skip
 					}
 					//TODO skip if empty array ?
-					outFolder := filepath.Join(gax, objType.Desc)
+					outFolder := filepath.Join(gaxFolder, objType.Desc)
 					if _, err := os.Stat(outFolder); err == nil {
 						logrus.Warnf("Overwriting old export %s", outFolder)
 						err = fs.Clean(outFolder)
@@ -157,12 +157,12 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 				}
 			}
 			if dumpZip {
-				logrus.Infof("Compacting folder: %s", gax)
-				err := fs.RecursiveZip(gax, gax+".zip")
+				logrus.Infof("Compacting folder: %s", gaxFolder)
+				err := fs.RecursiveZip(gaxFolder, gaxFolder+".zip")
 				if err != nil {
 					logrus.Panicf("Failed to zip folder : %v", err)
 				}
-				err = fs.Clean(gax)
+				err = fs.Clean(gaxFolder)
 				if err != nil {
 					logrus.Panicf("Clean up failed : %v", err)
 				}
@@ -180,10 +180,11 @@ func getData(gax string, list []object.ObjectType) map[string][]interface{} {
 
 func getJSONData(dumpFromJSON string, gax string, list []object.ObjectType) map[string][]interface{} {
 	var res = make(map[string][]interface{})
+	gaxFolder := strings.Replace(gax, ":", "-", -1)
 	for _, objType := range list {
 		//Get objects
 		var data []interface{}
-		bytes, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, gax, objType.Desc+".json"))
+		bytes, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, gaxFolder, objType.Desc+".json"))
 		if err != nil {
 			logrus.Warnf("List %s failed : %v", objType.Name, err)
 		}

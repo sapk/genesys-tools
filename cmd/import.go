@@ -36,6 +36,7 @@ var importCmd = &cobra.Command{
 	Short: "[WIP] Connect to a GAX server to import object from dump",
 	Long: `[WIP] Use GAX APIs to load  objects from dump of previous configuration.
 	Ex:  genesys-tools import hostb:8080 Application/*.md`,
+	//TODO list allowedImportTypes
 	Args: func(cmd *cobra.Command, args []string) error {
 		logrus.Debug("Checking args for list cmd: ", args)
 		if len(args) < 2 {
