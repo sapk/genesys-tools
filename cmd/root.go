@@ -13,7 +13,8 @@ var appVerbose bool
 
 var (
 	//Version version of app set by build flag
-	Version = "v0.0.3"
+	//Version = "v0.0.4"
+	Version = "latest"
 	//Branch git branch of app set by build flag
 	Branch = "master"
 	//Commit git commit of app set by build flag

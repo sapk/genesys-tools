@@ -7,13 +7,13 @@ import (
 	"os"
 )
 
-func WriteToFile(file, data string) error {
+func WriteToFile(file, data, sig string) error {
 	f, err := os.Create(file)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	_, err = f.WriteString(data)
+	_, err = f.WriteString(data + sig)
 	if err != nil {
 		return err
 	}

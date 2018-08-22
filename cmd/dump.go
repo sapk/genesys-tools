@@ -116,6 +116,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 				}
 			}
 			if !dumpOnlyJSON {
+				sig := fmt.Sprintf("\n[//]: # (generated @ %s by go-genesys-tools-%s/%s developed by Antoine GIRARD)\n", time.Now().Format(time.RFC3339), Version, Commit)
 				resume := "# " + gax + "\n\n"
 				for _, objType := range list {
 					if !objType.IsDumpable {
@@ -144,7 +145,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 						logrus.Infof("%s: %s (%s)", objType.Name, name, obj["dbid"])
 
 						if name != "" {
-							err = fs.WriteToFile(filepath.Join(outFolder, name+" ("+obj["dbid"].(string)+").md"), formatObj(objType, obj, data))
+							err = fs.WriteToFile(filepath.Join(outFolder, name+" ("+obj["dbid"].(string)+").md"), formatObj(objType, obj, data), sig)
 							if err != nil {
 								logrus.Panicf("File creation failed : %v", err)
 							}
@@ -154,7 +155,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 					}
 					resume += "\n"
 				}
-				err := fs.WriteToFile(filepath.Join(gaxFolder, "index.md"), resume)
+				err := fs.WriteToFile(filepath.Join(gaxFolder, "index.md"), resume, sig)
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
 				}

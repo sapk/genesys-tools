@@ -15,5 +15,13 @@ var (
 )
 
 func main() {
+	if Version != "" {
+		cmd.Version = Version
+	}
+	if Branch != "" {
+		cmd.Branch = Branch
+	}
+	cmd.Commit = Commit
+	cmd.BuildTime = BuildTime
 	cmd.Execute()
 }

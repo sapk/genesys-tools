@@ -4,7 +4,7 @@ package render
 const Template = `<!doctype html>
 <html>
 <head>
-    <title>Wiki</title>
+    <title>go-genesys-tools</title>
     <meta charset="utf-8" />
 
     <style type="text/css">
