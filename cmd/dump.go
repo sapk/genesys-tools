@@ -135,16 +135,16 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 					}
 					for _, o := range data[objType.Name] {
 						obj := o.(map[string]interface{})
-						logrus.Infof("%s: %s (%s)", objType.Name, obj["name"], obj["dbid"])
-
 						name := getFileName(obj)
+						logrus.Infof("%s: %s (%s)", objType.Name, name, obj["dbid"])
+
 						if name != "" {
 							err = fs.WriteToFile(filepath.Join(outFolder, name+" ("+obj["dbid"].(string)+").md"), formatObj(objType, obj, data))
 							if err != nil {
 								logrus.Panicf("File creation failed : %v", err)
 							}
 						} else {
-							logrus.Warnf("Ignoring invalid object / %s: %s (%s)", objType.Name, obj["name"], obj["dbid"])
+							logrus.Warnf("Ignoring invalid object / %s: %s (%s)", objType.Name, name, obj["dbid"])
 						}
 					}
 				}
