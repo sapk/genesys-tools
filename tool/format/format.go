@@ -16,7 +16,17 @@ import (
 )
 
 type Formater struct {
-	Format func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
+	Format      func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
+	FormatShort func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
+}
+
+func defaultShortFormater(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+	name := GetFileName(obj)
+	//	if objType.IsDumpable {
+	return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\))\n", name, objType.Desc, name, obj["dbid"])
+	//} else {
+	//return ""
+	//}
 }
 
 var FormaterList = map[string]Formater{
@@ -31,6 +41,7 @@ var FormaterList = map[string]Formater{
 			ret += dumpBackup(obj)
 			return ret
 		},
+		defaultShortFormater,
 	},
 }
 
@@ -87,6 +98,29 @@ var keyInformations = []struct {
 	{"isprimary", "Isprimary", nil},
 	{"backupserverdbid", "Backup Server", funcFindByType("CfgApplication")},
 	//TODO Add Host key inf and other
+}
+
+//Find best suitable name
+func GetFileName(obj map[string]interface{}) string {
+	name, ok := obj["name"].(string)
+	if ok {
+		name = strings.Replace(name, "/", " - ", -1)
+		name = strings.Replace(name, "\\", " - ", -1)
+		return name
+	}
+	name, ok = obj["username"].(string)
+	if ok {
+		name = strings.Replace(name, "/", " - ", -1)
+		name = strings.Replace(name, "\\", " - ", -1)
+		return name
+	}
+	name, ok = obj["number"].(string)
+	if ok {
+		name = strings.Replace(name, "/", " - ", -1)
+		name = strings.Replace(name, "\\", " - ", -1)
+		return name
+	}
+	return ""
 }
 
 func findTenants(tenantdbids interface{}, data map[string][]interface{}) string {
@@ -168,7 +202,7 @@ func dumpAvailableInformation(obj map[string]interface{}, data map[string][]inte
 			if inf.Format != nil {
 				val = inf.Format(val, data)
 			}
-			ret += " " + inf.Name + ": " + val.(string) + "\n"
+			ret += " - " + inf.Name + ": " + val.(string) + "\n"
 		}
 	}
 	return ret

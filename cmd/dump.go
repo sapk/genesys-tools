@@ -138,11 +138,9 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 					//TODO order objects
 					for _, o := range data[objType.Name] {
 						obj := o.(map[string]interface{})
-						name := getFileName(obj)
+						name := format.GetFileName(obj)
 
-						resume += fmt.Sprintf(" - %s (dbid:%s)\n", name, obj["dbid"])
-						//TODO declare a Format Short
-						//TODO link to detailled file
+						resume += formatShortObj(objType, obj, data)
 						logrus.Infof("%s: %s (%s)", objType.Name, name, obj["dbid"])
 
 						if name != "" {
@@ -156,7 +154,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 					}
 					resume += "\n"
 				}
-				err := fs.WriteToFile(filepath.Join(gaxFolder, "Resume.md"), resume)
+				err := fs.WriteToFile(filepath.Join(gaxFolder, "index.md"), resume)
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
 				}
@@ -176,29 +174,6 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 			}
 		}
 	},
-}
-
-//Find best suitable name
-func getFileName(obj map[string]interface{}) string {
-	name, ok := obj["name"].(string)
-	if ok {
-		name = strings.Replace(name, "/", " - ", -1)
-		name = strings.Replace(name, "\\", " - ", -1)
-		return name
-	}
-	name, ok = obj["username"].(string)
-	if ok {
-		name = strings.Replace(name, "/", " - ", -1)
-		name = strings.Replace(name, "\\", " - ", -1)
-		return name
-	}
-	name, ok = obj["number"].(string)
-	if ok {
-		name = strings.Replace(name, "/", " - ", -1)
-		name = strings.Replace(name, "\\", " - ", -1)
-		return name
-	}
-	return ""
 }
 
 func getData(gax string, list []object.ObjectType) map[string][]interface{} {
@@ -253,6 +228,14 @@ func getGAXData(gax string, list []object.ObjectType) map[string][]interface{} {
 		}
 	}
 	return res
+}
+
+//Call the good formatter if exist or use the default
+func formatShortObj(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+	if f, ok := format.FormaterList[objType.Name]; ok {
+		return f.FormatShort(objType, obj, data)
+	}
+	return format.FormaterList["default"].FormatShort(objType, obj, data)
 }
 
 //Call the good formatter if exist or use the default

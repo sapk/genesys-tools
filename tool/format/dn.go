@@ -26,6 +26,7 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
+		defaultShortFormater,
 	}
 	FormaterList["CfgDNGroup"] = Formater{
 		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
@@ -74,5 +75,6 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
+		defaultShortFormater,
 	}
 }
