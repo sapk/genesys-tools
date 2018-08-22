@@ -19,9 +19,9 @@ all: build compress done
 build: clean format compile
 #build: deps clean format compile
 
-release: clean deps format
+release: clean format
 	gox -ldflags "$(LDFLAGS)" -output="build/$(APP_NAME)-{{.OS}}-{{.Arch}}"
-#TODO compress
+	upx build/$(APP_NAME)-*
 
 deps:
 	@echo -e "$(OK_COLOR)==> Installing dependencies ...$(NO_COLOR)"

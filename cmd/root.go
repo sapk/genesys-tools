@@ -41,8 +41,15 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initVerbose)
-
+	RootCmd.Long = RootCmd.Short + fmt.Sprintf("\nVersion: %s - Branch: %s - Commit: %s - BuildTime: %s\n\n", Version, Branch, Commit, BuildTime)
 	RootCmd.PersistentFlags().BoolVarP(&appVerbose, "verbose", "v", false, "Turn on verbose logging")
+	RootCmd.AddCommand(&cobra.Command{
+		Use:   "version",
+		Short: "Display current version and build date",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("\nVersion: %s - Branch: %s - Commit: %s - BuildTime: %s\n\n", Version, Branch, Commit, BuildTime)
+		},
+	})
 	//RootCmd.PersistentFlags().BoolVar(&appCSVOutput, "csv", false, "Turn on verbose logging output compatible with csv")
 	//RootCmd.AddCommand(dump.DumpCmd)
 	//RootCmd.AddCommand(check.CheckCmd)
