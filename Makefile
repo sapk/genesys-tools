@@ -4,7 +4,7 @@ APP_PACKAGE=github.com/sapk/go-genesys
 
 GIT_HASH=$(shell git rev-parse --short HEAD)
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
-DATE := $(shell date -u '+%Y-%m-%d-%H%M-UTC')
+DATE := $(shell date -u '+%Y-%m-%d-%H%M-UTC' | base64)
 
 LDFLAGS = \
   -s -w \
