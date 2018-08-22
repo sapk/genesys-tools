@@ -38,7 +38,7 @@ var importCmd = &cobra.Command{
 	Ex:  genesys-tools import hostb:8080 Application/*.md`,
 	//TODO list allowedImportTypes
 	Args: func(cmd *cobra.Command, args []string) error {
-		logrus.Debug("Checking args for list cmd: ", args)
+		logrus.Debug("Checking args for import cmd: ", args)
 		if len(args) < 2 {
 			return fmt.Errorf("requires at least one GAX server and one file to import")
 		}

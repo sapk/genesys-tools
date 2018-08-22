@@ -3,6 +3,7 @@ package check
 
 import (
 	"io/ioutil"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -76,4 +77,12 @@ func IsValidFileArg(arg string) bool {
 	}
 	//check whether s contains md comment with json //TODO regex
 	return strings.Contains(string(b), "[//]: # ({")
+}
+
+func IsValidFolderArg(arg string) bool {
+	_, err := ioutil.ReadFile(filepath.Join(arg, "index.md"))
+	if err != nil {
+		return false
+	}
+	return true
 }
