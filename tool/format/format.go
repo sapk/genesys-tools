@@ -37,7 +37,7 @@ var FormaterList = map[string]Formater{
 var keyInformations = []struct {
 	ID     string
 	Name   string
-	Format func(string, map[string][]interface{}) string
+	Format func(interface{}, map[string][]interface{}) string
 }{
 	//Generic
 	{"dbid", "DBID", nil},
@@ -54,6 +54,7 @@ var keyInformations = []struct {
 	{"state", "State", nil},
 	{"folderid", "Folder path", findFolderPath},
 	{"description", "Description", nil},
+	{"tenantdbids", "Tenants", findTenants},
 	//DN
 	{"number", "Number", nil},
 	{"switchdbid", "Switch", funcFindByType("CfgSwitch")},
@@ -88,6 +89,28 @@ var keyInformations = []struct {
 	//TODO Add Host key inf and other
 }
 
+func findTenants(tenantdbids interface{}, data map[string][]interface{}) string {
+	if tenantdbids == nil {
+		return "" //Empty
+	}
+	obj := tenantdbids.(map[string]interface{})
+	_, ok := obj["id"]
+	if !ok || obj["id"] == nil {
+		return "" //Empty
+	}
+	var ids object.CfgDBIDList
+	err := mapstructure.Decode(obj["id"], &ids)
+	if err != nil {
+		logrus.Warnf("Fail to convert to CfgDBIDList")
+		return err.Error()
+	}
+	ret := " "
+	for _, id := range ids {
+		ret += findObjName("CfgTenant", id.Dbid, data) + ", "
+	}
+	return strings.Trim(ret, ", ")
+}
+
 func findObj(t string, id string, data map[string][]interface{}) map[string]interface{} {
 	if id == "0" {
 		return nil
@@ -113,7 +136,8 @@ func findObjName(t string, id string, data map[string][]interface{}) string {
 	return id
 }
 
-func findFolderPath(idFolder string, data map[string][]interface{}) string {
+func findFolderPath(id interface{}, data map[string][]interface{}) string {
+	idFolder := id.(string)
 	f := findObj("CfgFolder", idFolder, data) //Chainload to have full path
 	if f == nil {
 		return idFolder
@@ -129,22 +153,22 @@ func findFolderPath(idFolder string, data map[string][]interface{}) string {
 	return idFolder //Chainload to have full path
 }
 
-func funcFindByType(t string) func(string, map[string][]interface{}) string {
-	return func(id string, data map[string][]interface{}) string {
-		return findObjName(t, id, data)
+func funcFindByType(t string) func(interface{}, map[string][]interface{}) string {
+	return func(id interface{}, data map[string][]interface{}) string {
+		return findObjName(t, id.(string), data)
 	}
 }
 
 func dumpAvailableInformation(obj map[string]interface{}, data map[string][]interface{}) string {
 	ret := "## Informations: \n"
 	for _, inf := range keyInformations {
-		val, ok := obj[inf.ID].(string)
+		val, ok := obj[inf.ID]
+		//.(string)
 		if ok {
-			//TODO call Format if not null
 			if inf.Format != nil {
 				val = inf.Format(val, data)
 			}
-			ret += " " + inf.Name + ": " + val + "\n"
+			ret += " " + inf.Name + ": " + val.(string) + "\n"
 		}
 	}
 	return ret
