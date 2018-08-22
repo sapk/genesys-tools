@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 	//"path/filepath"
 	//"sort"
 	"strings"
@@ -149,11 +150,13 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 				}
 			}
 			if dumpZip {
+				time.Sleep(250 * time.Millisecond) //Sleep to let the prog release access on file
 				logrus.Infof("Compacting folder: %s", gaxFolder)
 				err := fs.RecursiveZip(gaxFolder, gaxFolder+".zip")
 				if err != nil {
 					logrus.Panicf("Failed to zip folder : %v", err)
 				}
+				time.Sleep(250 * time.Millisecond) //Sleep to let the prog release access on file
 				err = fs.Clean(gaxFolder)
 				if err != nil {
 					logrus.Panicf("Clean up failed : %v", err)
