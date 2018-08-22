@@ -21,7 +21,7 @@ build: clean format compile
 
 release: clean format
 	gox -ldflags "$(LDFLAGS)" -output="build/$(APP_NAME)-{{.OS}}-{{.Arch}}"
-	upx build/$(APP_NAME)-*
+	@upx build/$(APP_NAME)-* || true
 
 deps:
 	@echo -e "$(OK_COLOR)==> Installing dependencies ...$(NO_COLOR)"
