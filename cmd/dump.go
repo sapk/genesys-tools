@@ -116,7 +116,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 				}
 			}
 			if !dumpOnlyJSON {
-				sig := fmt.Sprintf("\n[//]: # (generated @ %s by go-genesys-tools-%s/%s developed by Antoine GIRARD)\n", time.Now().Format(time.RFC3339), Version, Commit)
+				sig := fmt.Sprintf("\n[//]: # (generated @ %s by genesys-tools-%s/%s developed by Antoine GIRARD)\n", time.Now().Format(time.RFC3339), Version, Commit)
 				resume := "# " + gax + "\n\n"
 				for _, objType := range list {
 					if !objType.IsDumpable {
