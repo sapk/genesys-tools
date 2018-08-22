@@ -202,7 +202,7 @@ func dumpAvailableInformation(obj map[string]interface{}, data map[string][]inte
 			if inf.Format != nil {
 				val = inf.Format(val, data)
 			}
-			ret += " - " + inf.Name + ": " + val.(string) + "\n"
+			ret += " " + inf.Name + ": " + val.(string) + "  \n"
 		}
 	}
 	return ret
@@ -240,17 +240,17 @@ func formatAnnexes(obj map[string]interface{}, data map[string][]interface{}) st
 	annexList := ""
 	for _, s := range sectionsAnnex.Values() {
 		sec := s.(string)
-		annexList += " [" + sec + "]\n"
+		annexList += " [" + sec + "]  \n"
 		for _, o := range annexes[sec].Keys() {
 			opt := o.(string)
 			val, _ := annexes[s.(string)].Get(opt)
-			annexList += "  " + opt + " = " + val.(string) + "\n"
+			annexList += "  " + opt + " = " + val.(string) + "  \n"
 		}
 		//optList += " - [" + o.Section + "] / " + o.Key + " = " + o.Value + "\n"
 	}
 	ret := fmt.Sprintf("## Annexes (%d): \n", strings.Count(annexList, "\n")-sectionsAnnex.Size())
 	ret += annexList
-	ret += "\n"
+	ret += "  \n"
 	return ret
 }
 
@@ -275,17 +275,17 @@ func formatOptions(obj map[string]interface{}, data map[string][]interface{}) st
 	optList := ""
 	for _, s := range sections.Values() {
 		sec := s.(string)
-		optList += " [" + sec + "]\n"
+		optList += " [" + sec + "]  \n"
 		for _, o := range options[sec].Keys() {
 			opt := o.(string)
 			val, _ := options[s.(string)].Get(opt)
-			optList += "  " + opt + " = " + val.(string) + "\n"
+			optList += "  " + opt + " = " + val.(string) + "  \n"
 		}
 		//optList += " - [" + o.Section + "] / " + o.Key + " = " + o.Value + "\n"
 	}
 
 	ret := fmt.Sprintf("## Options (%d): \n", strings.Count(optList, "\n")-sections.Size())
 	ret += optList
-	ret += "\n"
+	ret += "  \n"
 	return ret
 }

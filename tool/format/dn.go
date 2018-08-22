@@ -61,10 +61,10 @@ func init() {
 						logrus.Warnf("Fail to convert to CfgDN")
 						dnList += "  dbid:" + number + "\n"
 					} else {
-						dnList += "  " + dn.Number + " (" + dn.Subtype + "/" + dn.Dbid + ")\n"
+						dnList += "  " + dn.Number + " (" + dn.Subtype + "/" + dn.Dbid + ")  \n"
 					}
 				} else {
-					dnList += "  dbid:" + number + "\n"
+					dnList += "  dbid:" + number + "  \n"
 				}
 			}
 

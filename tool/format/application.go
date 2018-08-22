@@ -45,7 +45,7 @@ func formatApplication(obj map[string]interface{}, data map[string][]interface{}
 	for _, id := range ports.Keys() {
 		port := id.(string)
 		val, _ := ports.Get(port)
-		portList += "  " + val.(string) + " / " + port + "\n"
+		portList += "  " + val.(string) + " / " + port + "  \n"
 	}
 	ret := fmt.Sprintf("## Listening ports (%d): \n", ports.Size())
 	ret += portList
@@ -59,7 +59,7 @@ func formatApplication(obj map[string]interface{}, data map[string][]interface{}
 	for _, id := range connections.Keys() {
 		appName := id.(string)
 		val, _ := connections.Get(appName)
-		connList += "  " + appName + " / " + val.(string) + "\n"
+		connList += "  " + appName + " / " + val.(string) + "  \n"
 	}
 	ret += fmt.Sprintf("## Connections (%d): \n", connections.Size())
 	ret += connList
