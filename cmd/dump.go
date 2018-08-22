@@ -116,6 +116,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 				}
 			}
 			if !dumpOnlyJSON {
+				resume := "# " + gax + "\n\n"
 				for _, objType := range list {
 					if !objType.IsDumpable {
 						continue //Skip
@@ -133,9 +134,15 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 					if err != nil {
 						logrus.Panicf("Folder creation failed : %v", err)
 					}
+					resume += fmt.Sprintf("## %s (%d) :\n", objType.Desc, len(data[objType.Name]))
+					//TODO order objects
 					for _, o := range data[objType.Name] {
 						obj := o.(map[string]interface{})
 						name := getFileName(obj)
+
+						resume += fmt.Sprintf(" - %s (dbid:%s)\n", name, obj["dbid"])
+						//TODO declare a Format Short
+						//TODO link to detailled file
 						logrus.Infof("%s: %s (%s)", objType.Name, name, obj["dbid"])
 
 						if name != "" {
@@ -147,6 +154,11 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 							logrus.Warnf("Ignoring invalid object / %s: %s (%s)", objType.Name, name, obj["dbid"])
 						}
 					}
+					resume += "\n"
+				}
+				err := fs.WriteToFile(filepath.Join(gaxFolder, "Resume.md"), resume)
+				if err != nil {
+					logrus.Panicf("File creation failed : %v", err)
 				}
 			}
 			if dumpZip {
