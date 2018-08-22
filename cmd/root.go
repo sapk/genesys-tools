@@ -62,7 +62,7 @@ func initVerbose() {
 		buildT, _ := time.Parse("2006-01-02-1504-UTC", BuildTime)
 		runT := time.Now()
 		//logrus.Debugf("%v < %v = %b", buildT, runT.AddDate(0, -6, 0), runT.AddDate(0, -6, 0).After(buildT))
-		if runT.AddDate(0, -9, 0).After(buildT) {
+		if runT.AddDate(0, -6, 0).After(buildT) {
 			logrus.Warnln("This version of go-genesys-tools seems to old. Please upgrade to a newer one.")
 			os.Exit(0)
 		}

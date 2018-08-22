@@ -1,5 +1,6 @@
-APP_NAME=go-genesys-tools
+APP_NAME=genesys-tools
 APP_VERSION=$(shell git describe --tags --abbrev=0)
+APP_PACKAGE=github.com/sapk/go-genesys
 
 GIT_HASH=$(shell git rev-parse --short HEAD)
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
@@ -7,7 +8,7 @@ DATE := $(shell date -u '+%Y-%m-%d-%H%M-UTC')
 
 LDFLAGS = \
   -s -w \
--X main.Version=$(APP_VERSION) -X main.Branch=$(GIT_BRANCH) -X main.Commit=$(GIT_HASH) -X main.BuildTime=$(DATE)
+-X $(APP_PACKAGE)/cmd.Version=$(APP_VERSION) -X $(APP_PACKAGE)/cmd.Branch=$(GIT_BRANCH) -X $(APP_PACKAGE)/cmd.Commit=$(GIT_HASH) -X $(APP_PACKAGE)/cmd.BuildTime=$(DATE)
 
 ERROR_COLOR=\033[31;01m
 NO_COLOR=\033[0m
@@ -39,7 +40,7 @@ format:
 
 compile:
 	@echo -e "$(OK_COLOR)==> Building...$(NO_COLOR)"
-	go build -v -ldflags "$(LDFLAGS)"
+	go build -v -ldflags "$(LDFLAGS)" -o $(APP_NAME)
 
 compress:
 	@echo -e "$(OK_COLOR)==> Trying to compress binary ...$(NO_COLOR)"
