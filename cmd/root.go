@@ -4,6 +4,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -42,7 +43,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initVerbose)
-	RootCmd.Long = RootCmd.Short + fmt.Sprintf("\nVersion: %s - Branch: %s - Commit: %s - BuildTime: %s\n\n", Version, Branch, Commit, BuildTime)
+	//RootCmd.Long = RootCmd.Short + fmt.Sprintf("\nVersion: %s - Branch: %s - Commit: %s - BuildTime: %s\n\n", Version, Branch, Commit, BuildTime)
 	RootCmd.PersistentFlags().BoolVarP(&appVerbose, "verbose", "v", false, "Turn on verbose logging")
 	RootCmd.AddCommand(&cobra.Command{
 		Use:   "version",
@@ -57,6 +58,15 @@ func init() {
 }
 
 func initVerbose() {
+	if BuildTime != "" {
+		buildT, _ := time.Parse("2006-01-02-1504-UTC", BuildTime)
+		runT := time.Now()
+		//logrus.Debugf("%v < %v = %b", buildT, runT.AddDate(0, -6, 0), runT.AddDate(0, -6, 0).After(buildT))
+		if runT.AddDate(0, -9, 0).After(buildT) {
+			logrus.Warnln("This version of go-genesys-tools seems to old. Please upgrade to a newer one.")
+			os.Exit(0)
+		}
+	}
 	if appVerbose {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {

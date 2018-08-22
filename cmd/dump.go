@@ -64,7 +64,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 	Ex:  genesys-tools dump 172.18.0.5:8080 hosta hostb:4242`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		logrus.Debug("Checking args for dump cmd: ", args)
-		if len(args) > 1 {
+		if len(args) < 1 {
 			return fmt.Errorf("requires at least one GAX server")
 		}
 		/*
