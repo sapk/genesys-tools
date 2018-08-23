@@ -35,7 +35,8 @@ func defaultShortFormater(objType object.ObjectType, obj map[string]interface{},
 var FormaterList = map[string]Formater{
 	"default": Formater{
 		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
-			ret := "# " + obj["name"].(string) + "\n"
+			name := GetFileName(obj)
+			ret := "# " + name + "\n"
 			ret += "\n"
 
 			ret += dumpAvailableInformation(obj, data) + "\n"
@@ -105,24 +106,16 @@ var keyInformations = []struct {
 
 //Find best suitable name
 func GetFileName(obj map[string]interface{}) string {
-	name, ok := obj["name"].(string)
-	if ok {
-		name = strings.Replace(name, "/", " - ", -1)
-		name = strings.Replace(name, "\\", " - ", -1)
-		return name
+
+	for _, idPossible := range []string{"name", "username", "number", "logincode"} {
+		name, ok := obj[idPossible].(string)
+		if ok {
+			name = strings.Replace(name, "/", " - ", -1)
+			name = strings.Replace(name, "\\", " - ", -1)
+			return name
+		}
 	}
-	name, ok = obj["username"].(string)
-	if ok {
-		name = strings.Replace(name, "/", " - ", -1)
-		name = strings.Replace(name, "\\", " - ", -1)
-		return name
-	}
-	name, ok = obj["number"].(string)
-	if ok {
-		name = strings.Replace(name, "/", " - ", -1)
-		name = strings.Replace(name, "\\", " - ", -1)
-		return name
-	}
+
 	return ""
 }
 
