@@ -152,10 +152,14 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	}
 	defer resp.Body.Close()
 
+	//For debug
+	//buf := new(bytes.Buffer)
+	//buf.ReadFrom(resp.Body)
 	logrus.WithFields(logrus.Fields{
 		"Method": req.Method,
 		"Path":   req.URL.Path,
-		"Body":   resp.Body,
+		"Status": resp.Status,
+		"Length": resp.ContentLength,
 	}).Debug("Request response")
 	err = json.NewDecoder(resp.Body).Decode(v)
 	return resp, err

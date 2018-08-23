@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"reflect"
 	"strings"
 
 	"github.com/sapk/go-genesys/api/client"
@@ -20,7 +21,8 @@ var (
 )
 var allowedImportTypes = map[string]bool{
 	//"CfgApplication":  true,
-	"CfgAppPrototype": true,
+	//"CfgAppPrototype": true,
+	"CfgField": true,
 }
 
 //TODO importe template and metadata first
@@ -70,6 +72,9 @@ var importCmd = &cobra.Command{
 
 		for _, file := range args[1:] {
 			obj := getObj(file)
+			logrus.WithFields(logrus.Fields{
+				"Object": obj,
+			}).Info("Parsing object")
 
 			t, ok := obj["type"].(string)
 			if !ok {
@@ -81,8 +86,7 @@ var importCmd = &cobra.Command{
 				continue
 			}
 
-			var list []map[string]interface{}
-			c.ListObject(t, &list)
+			list := loader.ListObject(c, t)
 			logrus.Debugf("List response : %v", list)
 
 			if len(list) == 0 { //no same object so we create
@@ -90,11 +94,11 @@ var importCmd = &cobra.Command{
 				createObj(c, obj)
 			} else {
 				//Try to find if a app is matching
-				list = FilterBy(obj, list, MatchIdName)
+				list = loader.FilterBy(obj, list, loader.MatchIdName)
 				if len(list) == 0 {
-					list = FilterBy(obj, list, MatchName)
+					list = loader.FilterBy(obj, list, loader.MatchName)
 					if len(list) == 0 {
-						list = FilterBy(obj, list, MatchId)
+						list = loader.FilterBy(obj, list, loader.MatchId)
 					}
 				}
 				//TODO less ugly
@@ -103,10 +107,12 @@ var importCmd = &cobra.Command{
 				case 0: //no same object so we create
 					createObj(c, obj)
 				case 1:
+					//TODO ask if overwrite
 					updateObj(c, list[0], obj)
 				default:
 					logrus.Warnf("Multiple object matching : %s", file)
 					for _, src := range list {
+						//TODO ask if overwrite
 						updateObj(c, src, obj)
 					}
 				}
@@ -115,37 +121,32 @@ var importCmd = &cobra.Command{
 	},
 }
 
-//TODO match for each format like format
-
-func FilterBy(obj map[string]interface{}, data []map[string]interface{}, cmp func(map[string]interface{}, map[string]interface{}) bool) []map[string]interface{} {
-	ret := make([]map[string]interface{}, 0)
-	for _, o := range data {
-		if cmp(obj, o) {
-			ret = append(ret, obj) //TODO best allocate
-		}
-	}
-	return ret
-}
-
-func MatchId(src, dst map[string]interface{}) bool {
-	return src["dbid"] == dst["dbid"]
-}
-func MatchName(src, dst map[string]interface{}) bool {
-	return src["name"] == dst["name"] || src["username"] == dst["username"]
-}
-func MatchIdName(src, dst map[string]interface{}) bool { //TODO Manage Person (username)
-	return MatchName(src, dst) && MatchId(src, dst)
-}
-
 func updateObj(c *client.Client, src map[string]interface{}, obj map[string]interface{}) error {
 	logrus.WithFields(logrus.Fields{
 		"Source": src,
 		"Object": obj,
 	}).Debugf("Update object")
+	eq := reflect.DeepEqual(obj, src)
+	if eq {
+		logrus.WithFields(logrus.Fields{
+			"Source": src,
+			"Object": obj,
+		}).Info("Skipping update of object because of equality")
+		return nil
+	}
 	if f, ok := loader.LoaderList[obj["type"].(string)]; ok {
 		obj = f.FormatUpdate(c, src, obj)
 	} else {
 		obj = loader.LoaderList["default"].FormatUpdate(c, src, obj)
+	}
+	//TODO check eq after cleaning
+	eq = reflect.DeepEqual(obj, src)
+	if eq {
+		logrus.WithFields(logrus.Fields{
+			"Source": src,
+			"Object": obj,
+		}).Info("Skipping update of object because of equality after loading format")
+		return nil
 	}
 	logrus.WithFields(logrus.Fields{
 		"Object": obj,
@@ -154,13 +155,14 @@ func updateObj(c *client.Client, src map[string]interface{}, obj map[string]inte
 	//TODO get dbid for older one ?
 	//TODO check possible deps
 	//TODO check if no change
+	//TODO ask
 	_, err := c.UpdateObject(src["type"].(string), src["dbid"].(string), obj) //TODO check up
 	return err
 }
 func createObj(c *client.Client, obj map[string]interface{}) error {
 	logrus.WithFields(logrus.Fields{
 		"Object": obj,
-	}).Debugf("Create object")
+	}).Info("Create object")
 	if f, ok := loader.LoaderList[obj["type"].(string)]; ok {
 		obj = f.FormatCreate(c, obj)
 	} else {
@@ -169,6 +171,7 @@ func createObj(c *client.Client, obj map[string]interface{}) error {
 	logrus.WithFields(logrus.Fields{
 		"Object": obj,
 	}).Debugf("Sending new object")
+	//TODO ask
 	_, err := c.PostObject(obj) //TODO check up
 	return err
 }

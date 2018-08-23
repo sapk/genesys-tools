@@ -44,3 +44,10 @@
 [[constraint]]
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
+[[constraint]]
+  version = "1.5.1"
+  name = "github.com/russross/blackfriday"
+
+#[[constraint]]
+#  name = "github.com/c-bata/go-prompt"
+#  version = "0.2.2"
