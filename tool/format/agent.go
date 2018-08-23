@@ -37,7 +37,11 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
-		defaultShortFormater,
+		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+			name := GetFileName(obj)
+			//	if objType.IsDumpable {
+			return fmt.Sprintf(" - [%s %s](./%s/%s \\(%s\\)) (%s/%s)\n", obj["firstname"], obj["lastname"], objType.Desc, name, obj["dbid"], obj["username"], obj["employeeid"])
+		},
 	}
 	FormaterList["CfgAccessGroup"] = Formater{
 		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
