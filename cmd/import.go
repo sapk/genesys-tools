@@ -1,3 +1,6 @@
+// +build linux darwin windows
+// +build amd64 386
+
 // Copyright © 2018 Antoine GIRARD <antoine.girard@sapk.fr>
 package cmd
 
