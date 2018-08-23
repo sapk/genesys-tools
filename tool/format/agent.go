@@ -3,6 +3,7 @@ package format
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/mitchellh/mapstructure"
@@ -39,8 +40,12 @@ func init() {
 		},
 		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
 			name := GetFileName(obj)
+			displayname := strings.TrimSpace(catchNotString(obj["firstname"]) + " " + catchNotString(obj["lastname"]))
+			if displayname == "" {
+				displayname = obj["username"].(string)
+			}
 			//	if objType.IsDumpable {
-			return fmt.Sprintf(" - [%s %s](./%s/%s \\(%s\\)) (%s/%s)\n", obj["firstname"], obj["lastname"], objType.Desc, name, obj["dbid"], obj["username"], obj["employeeid"])
+			return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\)) (%s/%s)\n", displayname, objType.Desc, name, obj["dbid"], obj["username"], obj["employeeid"])
 		},
 	}
 	FormaterList["CfgAccessGroup"] = Formater{
@@ -59,6 +64,18 @@ func init() {
 	}
 }
 
+func catchNotString(obj interface{}) string {
+	/*
+		if obj == nil {
+			return ""
+		}
+	*/
+	str, ok := obj.(string)
+	if ok {
+		return str
+	}
+	return ""
+}
 func formatPersonDetails(obj map[string]interface{}, data map[string][]interface{}) string {
 	//TODO appranks
 	//TODO skilllevels
