@@ -25,7 +25,14 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
-		defaultShortFormater,
+		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+			name := GetFileName(obj)
+			if obj["hostdbid"] != nil && obj["hostdbid"] != "" {
+				host := findObjName("CfgHost", obj["hostdbid"].(string), data)
+				return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\)) (%s) @ %s\n", name, objType.Desc, name, obj["dbid"], obj["subtype"], host)
+			}
+			return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\)) (%s)\n", name, objType.Desc, name, obj["dbid"], obj["subtype"])
+		},
 	}
 }
 

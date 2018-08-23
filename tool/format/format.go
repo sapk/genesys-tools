@@ -23,6 +23,9 @@ type Formater struct {
 func defaultShortFormater(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
 	name := GetFileName(obj)
 	//	if objType.IsDumpable {
+	if obj["subtype"] != nil && obj["subtype"] != "" {
+		return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\)) (%s)\n", name, objType.Desc, name, obj["dbid"], obj["subtype"])
+	}
 	return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\))\n", name, objType.Desc, name, obj["dbid"])
 	//} else {
 	//return ""
