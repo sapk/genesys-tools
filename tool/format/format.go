@@ -47,6 +47,21 @@ var FormaterList = map[string]Formater{
 		},
 		defaultShortFormater,
 	},
+	"CfgFormat": Formater{
+		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+			name := GetFileName(obj)
+			ret := "# " + name + "\n"
+			ret += "\n"
+
+			ret += dumpAvailableInformation(obj, data) + "\n"
+			ret += formatFields(obj, data)
+			ret += formatOptions(obj, data)
+			ret += formatAnnexes(obj, data)
+			ret += dumpBackup(obj)
+			return ret
+		},
+		defaultShortFormater,
+	},
 }
 
 var keyInformations = []struct {
@@ -102,6 +117,24 @@ var keyInformations = []struct {
 	{"isprimary", "Isprimary", nil},
 	{"backupserverdbid", "Backup Server", funcFindByType("CfgApplication")},
 	//TODO Add Host key inf and other
+}
+
+func formatFields(obj map[string]interface{}, data map[string][]interface{}) string {
+	ret := "## Fields: \n"
+	var ids struct {
+		Id object.CfgDBIDList `json:"id"`
+	}
+	err := mapstructure.Decode(obj["fielddbids"], &ids)
+	if err != nil {
+		logrus.Warnf("Fail to convert to CfgDBIDList")
+		return err.Error()
+	}
+	for _, id := range ids.Id {
+		o := findObj("CfgField", id.Dbid, data)
+		ret += " - " + catchNotString(o["name"]) + " (" + id.Dbid + ") : " + catchNotString(o["description"]) + " \n"
+	}
+	//
+	return ret + " \n"
 }
 
 //Find best suitable name
