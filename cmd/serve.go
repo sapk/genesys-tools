@@ -31,7 +31,7 @@ var serveCmd = &cobra.Command{
 			return fmt.Errorf("Requires one folder to display")
 		}
 		if !check.IsValidFolderArg(args[0]) {
-			return fmt.Errorf("Invalid folder argument specified. Must contain a index.md file. (ex: gax_host-8080): %s", args[0])
+			return fmt.Errorf("Invalid folder argument specified. Must contain an index.md file. (ex: gax_host-8080): %s", args[0])
 		}
 		return nil
 	},
