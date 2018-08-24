@@ -106,18 +106,24 @@ var importCmd = &cobra.Command{
 				}
 				//TODO less ugly
 				//TODO manage errors
+				var err error
 				switch len(list) {
 				case 0: //no same object so we create
-					createObj(c, obj)
+					err = createObj(c, obj)
 				case 1:
 					//TODO ask if overwrite
-					updateObj(c, list[0], obj)
+					err = updateObj(c, list[0], obj)
 				default:
 					logrus.Warnf("Multiple object matching : %s", file)
 					for _, src := range list {
 						//TODO ask if overwrite
 						updateObj(c, src, obj)
 					}
+				}
+				if err != nil {
+					logrus.WithField("object", obj).Errorf("Failed to import object: %v", err)
+				} else {
+					logrus.WithField("object", obj).Infof("Import object success !")
 				}
 			}
 		}
@@ -128,7 +134,7 @@ func updateObj(c *client.Client, src map[string]interface{}, obj map[string]inte
 	logrus.WithFields(logrus.Fields{
 		"Source": src,
 		"Object": obj,
-	}).Debugf("Update object")
+	}).Info("Update object")
 	eq := reflect.DeepEqual(obj, src)
 	if eq {
 		logrus.WithFields(logrus.Fields{

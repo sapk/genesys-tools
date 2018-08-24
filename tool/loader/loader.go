@@ -46,6 +46,9 @@ var LoaderList = map[string]Loader{
 			if tenant, exist := obj["tenantdbid"]; exist {
 				obj["tenantdbid"] = searchFor(c, "CfgTenant", tenant.(string))
 			}
+			if folder, exist := obj["folderid"]; exist {
+				obj["folderid"] = searchFor(c, "CfgFolder", folder.(string))
+			}
 			logrus.WithFields(logrus.Fields{
 				"out": obj,
 			}).Debugf("default.FormatCreate")
@@ -54,7 +57,13 @@ var LoaderList = map[string]Loader{
 		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}) map[string]interface{} {
 			//TODO find matching prototype for app //TODO ask for password
 			obj["dbid"] = src["dbid"]
-			cleanObj(obj, "tenantdbid")
+			//TODO use default of src
+			if tenant, exist := src["tenantdbid"]; exist {
+				obj["tenantdbid"] = searchFor(c, "CfgTenant", tenant.(string))
+			}
+			if folder, exist := src["folderid"]; exist {
+				obj["folderid"] = searchFor(c, "CfgFolder", folder.(string))
+			}
 			return obj
 		},
 	},
@@ -83,6 +92,7 @@ func searchFor(c *client.Client, t string, id string) string {
 	logrus.Infof("Please choose a %s :", t)
 	val := prompt.Input("> ", func(d prompt.Document) []prompt.Suggest {
 		//logrus.WithField("list", list).Info("Fetched list")
+		//TODO put id corresponding obj if any first
 		s := make([]prompt.Suggest, len(list))
 		for i, o := range list {
 			//logrus.WithField("obj", o).Info("Add to list")
