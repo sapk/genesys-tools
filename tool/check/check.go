@@ -2,7 +2,10 @@
 package check
 
 import (
+	"bufio"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -85,4 +88,22 @@ func IsValidFolderArg(arg string) bool {
 		return false
 	}
 	return true
+}
+
+// AskFor ask for validation of a action (maybe if destructive ?)
+func AskFor(action string) bool {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print(action + "? y/n : ")
+	text, _ := reader.ReadString('\n')
+	for true {
+		switch strings.TrimSpace(text) {
+		case "y":
+			return true
+		case "n":
+			return false
+		}
+		fmt.Print(action + "? y/n : ")
+		text, _ = reader.ReadString('\n')
+	}
+	return false
 }

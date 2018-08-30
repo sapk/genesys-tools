@@ -88,7 +88,7 @@ func searchFor(c *client.Client, t string, id string) string {
 	//TODO search for seam id
 
 	list := ListObject(c, t)
-	logrus.WithField("list", list).WithField("type", t).Info("Fetched list")
+	logrus.WithField("list", list).WithField("type", t).Debugf("Fetched list")
 	logrus.Infof("Please choose a %s :", t)
 	val := prompt.Input("> ", func(d prompt.Document) []prompt.Suggest {
 		//logrus.WithField("list", list).Info("Fetched list")
@@ -134,11 +134,52 @@ func FilterBy(obj map[string]interface{}, data []map[string]interface{}, cmp fun
 }
 
 func MatchId(src, dst map[string]interface{}) bool {
+	logrus.WithFields(logrus.Fields{
+		"cmp":    "dbid",
+		"src":    src["dbid"],
+		"dst":    dst["dbid"],
+		"result": src["dbid"] == dst["dbid"],
+	}).Debug("Matching dbid")
 	return src["dbid"] == dst["dbid"]
 }
 func MatchName(src, dst map[string]interface{}) bool {
-	//TODO check not nil
-	return src["name"] == dst["name"] || src["username"] == dst["username"] || src["number"] == dst["number"] || src["logincode"] == dst["logincode"]
+	if src["name"] != nil && dst["name"] != nil {
+		logrus.WithFields(logrus.Fields{
+			"cmp":    "name",
+			"src":    src["name"],
+			"dst":    dst["name"],
+			"result": src["name"] == dst["name"],
+		}).Debug("Matching name")
+		return src["name"] == dst["name"]
+	}
+	if src["username"] != nil && dst["username"] != nil {
+		logrus.WithFields(logrus.Fields{
+			"cmp":    "username",
+			"src":    src["username"],
+			"dst":    dst["username"],
+			"result": src["username"] == dst["username"],
+		}).Debug("Matching username")
+		return src["username"] == dst["username"]
+	}
+	if src["number"] != nil && dst["number"] != nil {
+		logrus.WithFields(logrus.Fields{
+			"cmp":    "number",
+			"src":    src["number"],
+			"dst":    dst["number"],
+			"result": src["number"] == dst["number"],
+		}).Debug("Matching number")
+		return src["number"] == dst["number"]
+	}
+	if src["logincode"] != nil && dst["logincode"] != nil {
+		logrus.WithFields(logrus.Fields{
+			"cmp":    "logincode",
+			"src":    src["logincode"],
+			"dst":    dst["logincode"],
+			"result": src["logincode"] == dst["logincode"],
+		}).Debug("Matching logincode")
+		return src["logincode"] == dst["logincode"]
+	}
+	return false
 }
 func MatchIdName(src, dst map[string]interface{}) bool { //TODO Manage Person (username)
 	return MatchName(src, dst) && MatchId(src, dst)

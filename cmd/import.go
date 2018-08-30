@@ -21,11 +21,13 @@ import (
 var (
 	importUsername string
 	importPassword string
+	importForceYes bool
 )
 var allowedImportTypes = map[string]bool{
 	//"CfgApplication":  true,
 	//"CfgAppPrototype": true,
-	"CfgField": true,
+	"CfgField":  true,
+	"CfgScript": true,
 }
 
 //TODO importe template and metadata first
@@ -33,6 +35,7 @@ var allowedImportTypes = map[string]bool{
 func init() {
 	importCmd.Flags().StringVarP(&importUsername, "user", "u", "default", "GAX user name")
 	importCmd.Flags().StringVarP(&importPassword, "pass", "p", "password", "GAX user password")
+	importCmd.Flags().BoolVarP(&importForceYes, "force", "f", false, "Implies yes to each questions")
 	RootCmd.AddCommand(importCmd)
 }
 
@@ -75,9 +78,10 @@ var importCmd = &cobra.Command{
 
 		for _, file := range args[1:] {
 			obj := getObj(file)
+			logrus.Infof("Parsing %s: %s", obj["type"], obj["name"])
 			logrus.WithFields(logrus.Fields{
 				"Object": obj,
-			}).Info("Parsing object")
+			}).Debug("Parsing object")
 
 			t, ok := obj["type"].(string)
 			if !ok {
@@ -89,19 +93,24 @@ var importCmd = &cobra.Command{
 				continue
 			}
 
-			list := loader.ListObject(c, t)
-			logrus.Debugf("List response : %v", list)
+			l := loader.ListObject(c, t)
+			logrus.Debugf("List response : %v", l)
 
-			if len(list) == 0 { //no same object so we create
+			if len(l) == 0 { //no same object so we create
 				logrus.Debugf("Found no object with type : %v", t)
 				createObj(c, obj)
 			} else {
 				//Try to find if a app is matching
-				list = loader.FilterBy(obj, list, loader.MatchIdName)
+				list := loader.FilterBy(obj, l, loader.MatchIdName)
 				if len(list) == 0 {
-					list = loader.FilterBy(obj, list, loader.MatchName)
+					logrus.Debugf("Found no object with same DBID and Name")
+					list = loader.FilterBy(obj, l, loader.MatchName)
 					if len(list) == 0 {
-						list = loader.FilterBy(obj, list, loader.MatchId)
+						logrus.Debugf("Found no object with same Name")
+						list = loader.FilterBy(obj, l, loader.MatchId)
+						if len(list) == 0 {
+							logrus.Debugf("Found no object with same DBID")
+						}
 					}
 				}
 				//TODO less ugly
@@ -111,12 +120,10 @@ var importCmd = &cobra.Command{
 				case 0: //no same object so we create
 					err = createObj(c, obj)
 				case 1:
-					//TODO ask if overwrite
 					err = updateObj(c, list[0], obj)
 				default:
 					logrus.Warnf("Multiple object matching : %s", file)
 					for _, src := range list {
-						//TODO ask if overwrite
 						updateObj(c, src, obj)
 					}
 				}
@@ -164,9 +171,11 @@ func updateObj(c *client.Client, src map[string]interface{}, obj map[string]inte
 	//TODO get dbid for older one ?
 	//TODO check possible deps
 	//TODO check if no change
-	//TODO ask
-	_, err := c.UpdateObject(src["type"].(string), src["dbid"].(string), obj) //TODO check up
-	return err
+	if importForceYes || check.AskFor(fmt.Sprintf("Update %s '%s' (%s)", src["type"], src["name"], src["dbid"])) { // ask for confirmation
+		_, err := c.UpdateObject(src["type"].(string), src["dbid"].(string), obj) //TODO check up
+		return err
+	}
+	return nil
 }
 func createObj(c *client.Client, obj map[string]interface{}) error {
 	logrus.WithFields(logrus.Fields{
@@ -180,9 +189,12 @@ func createObj(c *client.Client, obj map[string]interface{}) error {
 	logrus.WithFields(logrus.Fields{
 		"Object": obj,
 	}).Debugf("Sending new object")
-	//TODO ask
-	_, err := c.PostObject(obj) //TODO check up
-	return err
+
+	if importForceYes || check.AskFor(fmt.Sprintf("Create %s '%s'", obj["type"], obj["name"])) { // ask for confirmation
+		_, err := c.PostObject(obj) //TODO check up
+		return err
+	}
+	return nil
 }
 
 func getObj(file string) map[string]interface{} {
