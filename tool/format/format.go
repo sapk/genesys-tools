@@ -17,16 +17,23 @@ import (
 
 type Formater struct {
 	Format      func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
-	FormatShort func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
+	FormatShort func(object.ObjectType, map[string]interface{}) string
 }
 
-func defaultShortFormater(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+func defaultShortFormater(objType object.ObjectType, obj map[string]interface{}) string {
 	name := GetFileName(obj)
-	//	if objType.IsDumpable {
-	if obj["subtype"] != nil && obj["subtype"] != "" {
-		return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\)) (%s)\n", name, objType.Desc, name, obj["dbid"], obj["subtype"])
+	//TODO better
+	if obj["dbid"] != nil {
+		if obj["subtype"] != nil && obj["subtype"] != "" {
+			return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\)) (%s)\n", name, objType.Desc, name, obj["dbid"], obj["subtype"])
+		}
+		return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\))\n", name, objType.Desc, name, obj["dbid"])
 	}
-	return fmt.Sprintf(" - [%s](./%s/%s \\(%s\\))\n", name, objType.Desc, name, obj["dbid"])
+	if obj["subtype"] != nil && obj["subtype"] != "" {
+		return fmt.Sprintf(" - [%s](./%s/%s) (%s)\n", name, objType.Desc, name, obj["subtype"])
+	}
+	return fmt.Sprintf(" - [%s](./%s/%s)\n", name, objType.Desc, name)
+	//	if objType.IsDumpable {
 	//} else {
 	//return ""
 	//}
@@ -317,4 +324,32 @@ func formatOptions(obj map[string]interface{}, data map[string][]interface{}) st
 	ret += optList
 	ret += "  \n"
 	return ret
+}
+func GetObjectType(obj map[string]interface{}) *object.ObjectType {
+	for _, o := range object.ObjectTypeList {
+		if obj["type"].(string) == o.Name {
+			return &o
+		}
+	}
+	return nil
+}
+
+//Call the good formatter if exist or use the default
+func FormatShortObj(obj map[string]interface{}) string {
+	objType := GetObjectType(obj)
+	if objType == nil {
+		return "Object Type Unknown: " + obj["type"].(string)
+	}
+	if f, ok := FormaterList[objType.Name]; ok {
+		return f.FormatShort(*objType, obj)
+	}
+	return FormaterList["default"].FormatShort(*objType, obj)
+}
+
+//Call the good formatter if exist or use the default
+func FormatObj(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+	if f, ok := FormaterList[objType.Name]; ok {
+		return f.Format(objType, obj, data)
+	}
+	return FormaterList["default"].Format(objType, obj, data)
 }

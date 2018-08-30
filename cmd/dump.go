@@ -141,11 +141,11 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 						obj := o.(map[string]interface{})
 						name := format.GetFileName(obj)
 
-						resume += formatShortObj(objType, obj, data)
+						resume += format.FormatShortObj(obj)
 						logrus.Infof("%s: %s (%s)", objType.Name, name, obj["dbid"])
 
 						if name != "" {
-							err = fs.WriteToFile(filepath.Join(outFolder, name+" ("+obj["dbid"].(string)+").md"), formatObj(objType, obj, data), sig)
+							err = fs.WriteToFile(filepath.Join(outFolder, name+" ("+obj["dbid"].(string)+").md"), format.FormatObj(objType, obj, data), sig)
 							if err != nil {
 								logrus.Panicf("File creation failed : %v", err)
 							}
@@ -229,20 +229,4 @@ func getGAXData(gax string, list []object.ObjectType) map[string][]interface{} {
 		}
 	}
 	return res
-}
-
-//Call the good formatter if exist or use the default
-func formatShortObj(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
-	if f, ok := format.FormaterList[objType.Name]; ok {
-		return f.FormatShort(objType, obj, data)
-	}
-	return format.FormaterList["default"].FormatShort(objType, obj, data)
-}
-
-//Call the good formatter if exist or use the default
-func formatObj(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
-	if f, ok := format.FormaterList[objType.Name]; ok {
-		return f.Format(objType, obj, data)
-	}
-	return format.FormaterList["default"].Format(objType, obj, data)
 }

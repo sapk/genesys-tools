@@ -13,6 +13,7 @@ import (
 
 	"github.com/sapk/go-genesys/api/client"
 	"github.com/sapk/go-genesys/tool/check"
+	"github.com/sapk/go-genesys/tool/format"
 	"github.com/sapk/go-genesys/tool/loader"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -23,11 +24,14 @@ var (
 	importPassword string
 	importForceYes bool
 )
+
+//TODO add help message for what is not imported
 var allowedImportTypes = map[string]bool{
 	//"CfgApplication":  true,
 	"CfgAppPrototype": true,
 	"CfgField":        true,
 	"CfgScript":       true,
+	"CfgAgentLogin":   true,
 }
 
 //TODO importe template and metadata first
@@ -171,7 +175,7 @@ func updateObj(c *client.Client, src map[string]interface{}, obj map[string]inte
 	//TODO get dbid for older one ?
 	//TODO check possible deps
 	//TODO check if no change
-	if importForceYes || check.AskFor(fmt.Sprintf("Update %s '%s' (%s)", src["type"], src["name"], src["dbid"])) { // ask for confirmation
+	if importForceYes || check.AskFor(fmt.Sprintf("Update %s", format.FormatShortObj(obj))) { // ask for confirmation
 		_, err := c.UpdateObject(src["type"].(string), src["dbid"].(string), obj) //TODO check up
 		return err
 	}
@@ -190,7 +194,7 @@ func createObj(c *client.Client, obj map[string]interface{}) error {
 		"Object": obj,
 	}).Debugf("Sending new object")
 
-	if importForceYes || check.AskFor(fmt.Sprintf("Create %s '%s'", obj["type"], obj["name"])) { // ask for confirmation
+	if importForceYes || check.AskFor(fmt.Sprintf("Create %s", format.FormatShortObj(obj))) { // ask for confirmation
 		_, err := c.PostObject(obj) //TODO check up
 		return err
 	}

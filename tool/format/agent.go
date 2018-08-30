@@ -38,7 +38,7 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.ObjectType, obj map[string]interface{}) string {
 			name := GetFileName(obj)
 			displayname := strings.TrimSpace(catchNotString(obj["firstname"]) + " " + catchNotString(obj["lastname"]))
 			if displayname == "" {
