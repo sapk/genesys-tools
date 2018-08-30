@@ -2,9 +2,10 @@
 package loader
 
 import (
-	"github.com/c-bata/go-prompt"
 	"github.com/sapk/go-genesys/api/client"
 	"github.com/sapk/go-genesys/tool/format"
+
+	"github.com/c-bata/go-prompt"
 	"github.com/sirupsen/logrus"
 )
 
@@ -49,6 +50,11 @@ var LoaderList = map[string]Loader{
 			if folder, exist := obj["folderid"]; exist {
 				obj["folderid"] = searchFor(c, "CfgFolder", folder.(string), defaults)
 			}
+			/*
+				if userproperties, exist := obj["userproperties"]; exist {
+						obj["userproperties"] = cleanEmptyAnnexes(userproperties.(map[string]interface{}))
+				}
+			*/
 			logrus.WithFields(logrus.Fields{
 				"out": obj,
 			}).Debugf("default.FormatCreate")
@@ -64,11 +70,32 @@ var LoaderList = map[string]Loader{
 			if folder, exist := src["folderid"]; exist {
 				obj["folderid"] = searchFor(c, "CfgFolder", folder.(string), defaults)
 			}
+			/*
+				if userproperties, exist := obj["userproperties"]; exist {
+					obj["userproperties"] = cleanEmptyAnnexes(userproperties.(map[string]interface{}))
+				}
+			*/
 			return obj
 		},
 	},
 }
 
+/*Some key failed but this is not the solution you are looking for
+func cleanEmptyAnnexes(o map[string]interface{}) interface{} {
+	var obj object.Userproperties
+	err := mapstructure.Decode(o, &obj)
+	if err != nil {
+		logrus.Warnf("Fail to convert to Userproperties -> Skipping cleaning")
+		return o
+	}
+	for id, val := range obj.Property {
+		if val.Key == "" {
+			obj.Property = append(obj.Property[:id], obj.Property[id+1:]...)
+		}
+	}
+	return obj
+}
+*/
 func searchFor(c *client.Client, t string, id string, defaults map[string]string) string {
 	//TODO search for seam id
 	//TODO history
