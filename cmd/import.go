@@ -28,6 +28,7 @@ var (
 //TODO add help message for what is not imported
 var allowedImportTypes = map[string]bool{
 	//"CfgApplication":  true,
+	"CfgPlace":        true, //lost link to contactdbid capacityruledbid dndbids sitedbid
 	"CfgDN":           true,
 	"CfgAppPrototype": true,
 	"CfgField":        true,

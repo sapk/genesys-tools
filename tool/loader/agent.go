@@ -20,8 +20,10 @@ func init() {
 		},
 		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}) map[string]interface{} {
 			logrus.WithFields(logrus.Fields{
-				"in": obj,
+				"src": src,
+				"obj": obj,
 			}).Debugf("CfgAgentLogin.FormatUpdate")
+			//TODO reuse by default value of src
 			obj = LoaderList["default"].FormatUpdate(c, src, obj)
 			if sw, exist := obj["switchdbid"]; exist {
 				obj["switchdbid"] = searchFor(c, "CfgSwitch", sw.(string))
