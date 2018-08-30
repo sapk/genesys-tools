@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -80,10 +81,8 @@ func initVerbose() {
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
-	/*
-		if !appCSVOutput {
-			logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
-			logrus.SetOutput(colorable.NewColorableStdout())
-		}
-	*/
+
+	//Get color on windows
+	logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+	logrus.SetOutput(colorable.NewColorableStdout())
 }

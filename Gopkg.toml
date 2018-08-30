@@ -52,6 +52,6 @@
 #  name = "github.com/c-bata/go-prompt"
 #  version = "0.2.2"
 
-[[constraint]]
-  branch = "master"
-  name = "github.com/mattn/go-tty"
+#[[constraint]]
+#  branch = "master"
+#  name = "github.com/mattn/go-tty"
