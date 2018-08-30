@@ -31,51 +31,61 @@ func ListObject(c *client.Client, t string) []map[string]interface{} {
 }
 
 type Loader struct {
-	FormatCreate func(*client.Client, map[string]interface{}) map[string]interface{}
-	FormatUpdate func(*client.Client, map[string]interface{}, map[string]interface{}) map[string]interface{}
+	FormatCreate func(*client.Client, map[string]interface{}, map[string]string) map[string]interface{}
+	FormatUpdate func(*client.Client, map[string]interface{}, map[string]interface{}, map[string]string) map[string]interface{}
 }
 
 var LoaderList = map[string]Loader{
 	"default": Loader{
-		FormatCreate: func(c *client.Client, obj map[string]interface{}) map[string]interface{} {
+		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
 			logrus.WithFields(logrus.Fields{
 				"in": obj,
 			}).Debugf("default.FormatCreate")
 			//cleanObj(obj, "dbid", "hostdbid", "appprototypedbid") //TODO find matching prototype for app //TODO ask for password
 			cleanObj(obj, "dbid")
 			if tenant, exist := obj["tenantdbid"]; exist {
-				obj["tenantdbid"] = searchFor(c, "CfgTenant", tenant.(string))
+				obj["tenantdbid"] = searchFor(c, "CfgTenant", tenant.(string), defaults)
 			}
 			if folder, exist := obj["folderid"]; exist {
-				obj["folderid"] = searchFor(c, "CfgFolder", folder.(string))
+				obj["folderid"] = searchFor(c, "CfgFolder", folder.(string), defaults)
 			}
 			logrus.WithFields(logrus.Fields{
 				"out": obj,
 			}).Debugf("default.FormatCreate")
 			return obj
 		},
-		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}) map[string]interface{} {
+		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
 			//TODO find matching prototype for app //TODO ask for password
 			obj["dbid"] = src["dbid"]
 			//TODO use default of src
 			if tenant, exist := src["tenantdbid"]; exist {
-				obj["tenantdbid"] = searchFor(c, "CfgTenant", tenant.(string))
+				obj["tenantdbid"] = searchFor(c, "CfgTenant", tenant.(string), defaults)
 			}
 			if folder, exist := src["folderid"]; exist {
-				obj["folderid"] = searchFor(c, "CfgFolder", folder.(string))
+				obj["folderid"] = searchFor(c, "CfgFolder", folder.(string), defaults)
 			}
 			return obj
 		},
 	},
 }
 
-func searchFor(c *client.Client, t string, id string) string {
+func searchFor(c *client.Client, t string, id string, defaults map[string]string) string {
 	//TODO search for seam id
+	//TODO history
+
+	//Use default value by default
+	if def, ok := defaults[t]; ok {
+		return def
+	}
 
 	list := ListObject(c, t)
 	logrus.WithField("list", list).WithField("type", t).Debugf("Fetched list")
 	logrus.Infof("Please choose a %s :", t)
 	val := prompt.Input("> ", func(d prompt.Document) []prompt.Suggest {
+		//log.Print(d.Text)
+		//		if d.Text == "" {
+		//			d.Text = "TEST"
+		//		}
 		//logrus.WithField("list", list).Info("Fetched list")
 		//TODO put id corresponding obj if any first
 		s := make([]prompt.Suggest, len(list))

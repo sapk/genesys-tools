@@ -20,9 +20,10 @@ import (
 )
 
 var (
-	importUsername string
-	importPassword string
-	importForceYes bool
+	importUsername       string
+	importPassword       string
+	importDefaultAnswers []string
+	importForceYes       bool
 )
 
 //TODO add help message for what is not imported
@@ -42,6 +43,7 @@ func init() {
 	importCmd.Flags().StringVarP(&importUsername, "user", "u", "default", "GAX user name")
 	importCmd.Flags().StringVarP(&importPassword, "pass", "p", "password", "GAX user password")
 	importCmd.Flags().BoolVarP(&importForceYes, "force", "f", false, "Implies yes to each questions")
+	importCmd.Flags().StringSliceVarP(&importDefaultAnswers, "default", "d", []string{}, "Default value to answer by object type. (Ex: -d 'CfgTenant=102,CfgTenant=224')")
 	RootCmd.AddCommand(importCmd)
 }
 
@@ -71,6 +73,17 @@ var importCmd = &cobra.Command{
 		if !strings.Contains(gax, ":") {
 			//By default use port 8080
 			gax += ":8080"
+		}
+
+		defaults := make(map[string]string)
+		for _, def := range importDefaultAnswers {
+			tmp := strings.Split(def, "=")
+			if len(tmp) != 2 {
+				logrus.WithField("default", def).Warn("Invalid default ignored")
+				continue
+			}
+			logrus.WithField("type", tmp[0]).WithField("value", tmp[1]).Debug("Registering default value")
+			defaults[tmp[0]] = tmp[1]
 		}
 		//Login
 		c := client.NewClient(gax)
@@ -104,7 +117,7 @@ var importCmd = &cobra.Command{
 
 			if len(l) == 0 { //no same object so we create
 				logrus.Debugf("Found no object with type : %v", t)
-				createObj(c, obj)
+				createObj(c, obj, defaults)
 			} else {
 				//Try to find if a app is matching
 				list := loader.FilterBy(obj, l, loader.MatchIdName)
@@ -126,13 +139,13 @@ var importCmd = &cobra.Command{
 				var err error
 				switch len(list) {
 				case 0: //no same object so we create
-					err = createObj(c, obj)
+					err = createObj(c, obj, defaults)
 				case 1:
-					err = updateObj(c, list[0], obj)
+					err = updateObj(c, list[0], obj, defaults)
 				default:
 					logrus.Warnf("Multiple object matching : %s", file)
 					for _, src := range list {
-						updateObj(c, src, obj)
+						updateObj(c, src, obj, defaults)
 					}
 				}
 				if err != nil {
@@ -145,7 +158,7 @@ var importCmd = &cobra.Command{
 	},
 }
 
-func updateObj(c *client.Client, src map[string]interface{}, obj map[string]interface{}) error {
+func updateObj(c *client.Client, src map[string]interface{}, obj map[string]interface{}, defaults map[string]string) error {
 	logrus.WithFields(logrus.Fields{
 		"Source": src,
 		"Object": obj,
@@ -159,9 +172,9 @@ func updateObj(c *client.Client, src map[string]interface{}, obj map[string]inte
 		return nil
 	}
 	if f, ok := loader.LoaderList[obj["type"].(string)]; ok {
-		obj = f.FormatUpdate(c, src, obj)
+		obj = f.FormatUpdate(c, src, obj, defaults)
 	} else {
-		obj = loader.LoaderList["default"].FormatUpdate(c, src, obj)
+		obj = loader.LoaderList["default"].FormatUpdate(c, src, obj, defaults)
 	}
 	//TODO check eq after cleaning
 	eq = reflect.DeepEqual(obj, src)
@@ -185,14 +198,14 @@ func updateObj(c *client.Client, src map[string]interface{}, obj map[string]inte
 	}
 	return nil
 }
-func createObj(c *client.Client, obj map[string]interface{}) error {
+func createObj(c *client.Client, obj map[string]interface{}, defaults map[string]string) error {
 	logrus.WithFields(logrus.Fields{
 		"Object": obj,
 	}).Info("Create object")
 	if f, ok := loader.LoaderList[obj["type"].(string)]; ok {
-		obj = f.FormatCreate(c, obj)
+		obj = f.FormatCreate(c, obj, defaults)
 	} else {
-		obj = loader.LoaderList["default"].FormatCreate(c, obj)
+		obj = loader.LoaderList["default"].FormatCreate(c, obj, defaults)
 	}
 	logrus.WithFields(logrus.Fields{
 		"Object": obj,

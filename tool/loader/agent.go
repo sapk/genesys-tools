@@ -8,25 +8,25 @@ import (
 
 func init() {
 	LoaderList["CfgAgentLogin"] = Loader{
-		FormatCreate: func(c *client.Client, obj map[string]interface{}) map[string]interface{} {
+		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
 			logrus.WithFields(logrus.Fields{
 				"in": obj,
 			}).Debugf("CfgAgentLogin.FormatCreate")
-			obj = LoaderList["default"].FormatCreate(c, obj)
+			obj = LoaderList["default"].FormatCreate(c, obj, defaults)
 			if sw, exist := obj["switchdbid"]; exist {
-				obj["switchdbid"] = searchFor(c, "CfgSwitch", sw.(string))
+				obj["switchdbid"] = searchFor(c, "CfgSwitch", sw.(string), defaults)
 			}
 			return obj
 		},
-		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}) map[string]interface{} {
+		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
 			logrus.WithFields(logrus.Fields{
 				"src": src,
 				"obj": obj,
 			}).Debugf("CfgAgentLogin.FormatUpdate")
 			//TODO reuse by default value of src
-			obj = LoaderList["default"].FormatUpdate(c, src, obj)
+			obj = LoaderList["default"].FormatUpdate(c, src, obj, defaults)
 			if sw, exist := obj["switchdbid"]; exist {
-				obj["switchdbid"] = searchFor(c, "CfgSwitch", sw.(string))
+				obj["switchdbid"] = searchFor(c, "CfgSwitch", sw.(string), defaults)
 			}
 			return obj
 		},

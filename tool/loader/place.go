@@ -11,11 +11,11 @@ import (
 
 func init() {
 	LoaderList["CfgPlace"] = Loader{
-		FormatCreate: func(c *client.Client, obj map[string]interface{}) map[string]interface{} {
+		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
 			logrus.WithFields(logrus.Fields{
 				"in": obj,
 			}).Debugf("CfgPlace.FormatCreate")
-			obj = LoaderList["default"].FormatCreate(c, obj)
+			obj = LoaderList["default"].FormatCreate(c, obj, defaults)
 			//lost link to contactdbid capacityruledbid dndbids sitedbid
 
 			if contactdbid, exist := obj["contactdbid"]; exist {
@@ -66,13 +66,13 @@ func init() {
 			}
 			return obj
 		},
-		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}) map[string]interface{} {
+		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
 			logrus.WithFields(logrus.Fields{
 				"src": src,
 				"obj": obj,
 			}).Debugf("CfgPlace.FormatUpdate")
 			//TODO reuse by default value of src
-			obj = LoaderList["default"].FormatUpdate(c, src, obj)
+			obj = LoaderList["default"].FormatUpdate(c, src, obj, defaults)
 			//lost link to contactdbid capacityruledbid dndbids sitedbid
 
 			if contactdbid, exist := obj["contactdbid"]; exist {
