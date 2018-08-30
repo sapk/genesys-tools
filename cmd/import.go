@@ -35,6 +35,7 @@ var allowedImportTypes = map[string]bool{
 	"CfgField":        true,
 	"CfgScript":       true,
 	"CfgAgentLogin":   true,
+	"CfgPerson":       true,
 }
 
 //TODO importe template and metadata first
@@ -201,7 +202,7 @@ func updateObj(c *client.Client, src map[string]interface{}, obj map[string]inte
 func createObj(c *client.Client, obj map[string]interface{}, defaults map[string]string) error {
 	logrus.WithFields(logrus.Fields{
 		"Object": obj,
-	}).Info("Create object")
+	}).Debug("Create object init")
 	if f, ok := loader.LoaderList[obj["type"].(string)]; ok {
 		obj = f.FormatCreate(c, obj, defaults)
 	} else {
@@ -209,7 +210,7 @@ func createObj(c *client.Client, obj map[string]interface{}, defaults map[string
 	}
 	logrus.WithFields(logrus.Fields{
 		"Object": obj,
-	}).Debugf("Sending new object")
+	}).Info("Create object")
 
 	if importForceYes || check.AskFor(fmt.Sprintf("Create %s", format.FormatShortObj(obj))) { // ask for confirmation
 		_, err := c.PostObject(obj) //TODO check up

@@ -96,13 +96,19 @@ func init() {
 				}
 			}
 			if dndbids, exist := obj["dndbids"]; exist {
-				if dndbids != "{\"id\":[]}" {
+				emptyDBIDList := struct {
+					Id object.CfgDBIDList `json:"id"`
+				}{Id: object.CfgDBIDList{}}
+				//{"id":[{"dbid":"143"}]}
+				eq := reflect.DeepEqual(dndbids, emptyDBIDList)
+				if !eq {
+					//if dndbids != "{\"id\":[]}" {
 					logrus.WithFields(logrus.Fields{
 						"dndbids": dndbids,
 					}).Warn("Attached DNs link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
-					obj["dndbids"] = "{\"id\":[]}"
+					obj["dndbids"] = emptyDBIDList
 				}
 			}
 			if sitedbid, exist := obj["sitedbid"]; exist {

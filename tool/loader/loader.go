@@ -75,6 +75,7 @@ func searchFor(c *client.Client, t string, id string, defaults map[string]string
 
 	//Use default value by default
 	if def, ok := defaults[t]; ok {
+		logrus.WithField("def", def).WithField("type", t).Debugf("Using default value")
 		return def
 	}
 
