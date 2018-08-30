@@ -25,9 +25,9 @@ var (
 )
 var allowedImportTypes = map[string]bool{
 	//"CfgApplication":  true,
-	//"CfgAppPrototype": true,
-	"CfgField":  true,
-	"CfgScript": true,
+	"CfgAppPrototype": true,
+	"CfgField":        true,
+	"CfgScript":       true,
 }
 
 //TODO importe template and metadata first

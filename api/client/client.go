@@ -161,6 +161,8 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 		"Status": resp.Status,
 		"Length": resp.ContentLength,
 	}).Debug("Request response")
-	err = json.NewDecoder(resp.Body).Decode(v)
+	if resp.StatusCode != 201 {
+		err = json.NewDecoder(resp.Body).Decode(v)
+	}
 	return resp, err
 }

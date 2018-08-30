@@ -67,21 +67,6 @@ var LoaderList = map[string]Loader{
 			return obj
 		},
 	},
-	/*
-		"CfgAppPrototype": Loader{
-			FormatCreate: func(c *client.Client, obj map[string]interface{}) map[string]interface{} {
-				//cleanObj(obj, "dbid", "hostdbid", "appprototypedbid") //TODO find matching prototype for app //TODO ask for password
-				cleanObj(obj, "dbid") //TODO find matching prototype for app //TODO ask for password
-				return obj
-			},
-			FormatUpdate: func(c *client.Client, src, obj map[string]interface{}) map[string]interface{} {
-				//TODO find matching prototype for app //TODO ask for password
-				obj["dbid"] = src["dbid"]
-				obj["folderid"] = "101" //Force Application Template Folder //TODO find a better folder
-				return obj
-			},
-		},
-	*/
 }
 
 func searchFor(c *client.Client, t string, id string) string {
