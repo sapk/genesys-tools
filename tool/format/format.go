@@ -334,6 +334,17 @@ func GetObjectType(obj map[string]interface{}) *object.ObjectType {
 	return nil
 }
 
+//TODO call this from get Filename
+func Name(obj map[string]interface{}) string {
+	for _, idPossible := range []string{"name", "username", "number", "logincode"} {
+		name, ok := obj[idPossible].(string)
+		if ok {
+			return name
+		}
+	}
+	return ""
+}
+
 //Call the good formatter if exist or use the default
 func FormatShortObj(obj map[string]interface{}) string {
 	objType := GetObjectType(obj)

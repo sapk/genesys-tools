@@ -28,6 +28,7 @@ var (
 //TODO add help message for what is not imported
 var allowedImportTypes = map[string]bool{
 	//"CfgApplication":  true,
+	"CfgDN":           true,
 	"CfgAppPrototype": true,
 	"CfgField":        true,
 	"CfgScript":       true,
@@ -82,7 +83,7 @@ var importCmd = &cobra.Command{
 
 		for _, file := range args[1:] {
 			obj := getObj(file)
-			logrus.Infof("Parsing %s: %s", obj["type"], obj["name"])
+			logrus.Infof("Parsing %s: %s", obj["type"], format.Name(obj))
 			logrus.WithFields(logrus.Fields{
 				"Object": obj,
 			}).Debug("Parsing object")
