@@ -113,10 +113,12 @@ var importCmd = &cobra.Command{
 					list = loader.FilterBy(obj, l, loader.MatchName)
 					if len(list) == 0 {
 						logrus.Debugf("Found no object with same Name")
+						/* Temporary disable as it doesn't match change in name for exemple (detected on place)
 						list = loader.FilterBy(obj, l, loader.MatchId)
 						if len(list) == 0 {
 							logrus.Debugf("Found no object with same DBID")
 						}
+						*/
 					}
 				}
 				//TODO less ugly
