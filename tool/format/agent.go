@@ -143,7 +143,7 @@ func formatAgentGroupDetails(obj map[string]interface{}, data map[string][]inter
 	ret := fmt.Sprintf("## Agents (%d): \n", uS)
 	ret += uL + "\n"
 
-	mL, mS := formatPersonList(ag.Agentdbids.ID, data)
+	mL, mS := formatPersonList(ag.Managerdbids.ID, data)
 	ret += fmt.Sprintf("## Managers (%d): \n", mS)
 	ret += mL + "\n"
 
