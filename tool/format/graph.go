@@ -12,6 +12,7 @@ import (
 //TODO grpah macro between host ?
 
 func formatHost(name, dbid string, links *string, linksCount *int, data map[string][]interface{}) string {
+	//TODO create bject for each port as it will aggregate some links and be more readable
 	ret := "    subgraph " + name + "\n"
 	for _, a := range data["CfgApplication"] {
 		var app object.CfgApplication
@@ -35,6 +36,10 @@ func formatHost(name, dbid string, links *string, linksCount *int, data map[stri
 				ret += fmt.Sprintf("    class %s primary\n", app.Dbid)
 			}
 
+			for _, p := range app.Portinfos.Portinfo {
+				ret += fmt.Sprintf("    %s-%s[%s]\n", app.Dbid, p.Port, p.Port)
+				*links += fmt.Sprintf("    %s(%s) --- %s-%s[%s]\n", app.Dbid, app.Name, app.Dbid, p.Port, p.Port)
+			}
 			for _, c := range app.Appservers.Conninfo {
 				r := findObj("CfgApplication", c.Appserverdbid, data)
 				var remote object.CfgApplication
@@ -54,9 +59,9 @@ func formatHost(name, dbid string, links *string, linksCount *int, data map[stri
 
 				//TODO line backup primaire
 				if remote.Hostdbid != app.Hostdbid {
-					*links += fmt.Sprintf("    %s(%s) ==>|%s| %s(%s)\n", app.Dbid, app.Name, port, remote.Dbid, remote.Name)
+					*links += fmt.Sprintf("    %s(%s) ==>  %s-%s[%s]\n", app.Dbid, app.Name, remote.Dbid, port, port)
 				} else {
-					*links += fmt.Sprintf("    %s(%s) -.->|%s| %s(%s)\n", app.Dbid, app.Name, port, remote.Dbid, remote.Name)
+					*links += fmt.Sprintf("    %s(%s) -.->  %s-%s[%s]\n", app.Dbid, app.Name, remote.Dbid, port, port)
 				}
 				if c.Mode == "CFGTMBoth" {
 					*links += fmt.Sprintf("    linkStyle %d stroke:red,stroke-width:4px;\n", *linksCount)
