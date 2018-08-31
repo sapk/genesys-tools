@@ -5,10 +5,82 @@ import (
 	"reflect"
 
 	"github.com/sapk/go-genesys/api/client"
+	"github.com/sapk/go-genesys/api/object"
 	"github.com/sirupsen/logrus"
 )
 
 func init() {
+	LoaderList["CfgAgentGroup"] = Loader{
+		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
+			logrus.WithFields(logrus.Fields{
+				"in": obj,
+			}).Debugf("CfgAgentGroup.FormatCreate")
+			obj = LoaderList["default"].FormatCreate(c, obj, defaults)
+
+			for _, val := range []string{"capacityruledbid", "capacitytabledbid", "contractdbid", "quotatabledbid", "sitedbid"} {
+				if dbid, exist := obj[val]; exist {
+					if dbid != "0" {
+						logrus.WithFields(logrus.Fields{
+							val: dbid,
+						}).Warnf("Attached %s link will be lost", val)
+						//TODO search
+						obj[val] = "0"
+					}
+				}
+			}
+
+			for _, val := range []string{"agentdbids", "managerdbids"} {
+				if dbids, exist := obj[val]; exist {
+					emptyDBIDList := struct {
+						Id object.CfgDBIDList `json:"id"`
+					}{Id: object.CfgDBIDList{}}
+					eq := reflect.DeepEqual(dbids, emptyDBIDList)
+					if !eq {
+						logrus.WithFields(logrus.Fields{
+							val: dbids,
+						}).Warnf("Attached %s link will be lost", val)
+						obj[val] = emptyDBIDList
+					}
+				}
+			}
+			return obj
+		},
+		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
+			logrus.WithFields(logrus.Fields{
+				"src": src,
+				"obj": obj,
+			}).Debugf("CfgAgentGroup.FormatUpdate")
+			//TODO reuse by default value of src
+			obj = LoaderList["default"].FormatUpdate(c, src, obj, defaults)
+			for _, val := range []string{"capacityruledbid", "capacitytabledbid", "contractdbid", "quotatabledbid", "sitedbid"} {
+				if dbid, exist := obj[val]; exist {
+					if dbid != "0" {
+						logrus.WithFields(logrus.Fields{
+							val: dbid,
+						}).Warnf("Attached %s link will be lost", val)
+						//TODO search
+						obj[val] = "0"
+					}
+				}
+			}
+
+			for _, val := range []string{"agentdbids", "managerdbids"} {
+				if dbids, exist := obj[val]; exist {
+					emptyDBIDList := struct {
+						Id object.CfgDBIDList `json:"id"`
+					}{Id: object.CfgDBIDList{}}
+					eq := reflect.DeepEqual(dbids, emptyDBIDList)
+					if !eq {
+						logrus.WithFields(logrus.Fields{
+							val: dbids,
+						}).Warnf("Attached %s link will be lost", val)
+						obj[val] = emptyDBIDList
+					}
+				}
+			}
+			return obj
+		},
+	}
 	LoaderList["CfgAgentLogin"] = Loader{
 		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
 			logrus.WithFields(logrus.Fields{

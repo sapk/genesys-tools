@@ -36,6 +36,7 @@ var allowedImportTypes = map[string]bool{
 	"CfgScript":       true,
 	"CfgAgentLogin":   true,
 	"CfgPerson":       true,
+	"CfgAgentGroup":   true,
 }
 
 //TODO importe template and metadata first
