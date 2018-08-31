@@ -155,6 +155,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 					}
 					resume += "\n"
 				}
+				resume += format.GenerateMermaidGraph(data)
 				err := fs.WriteToFile(filepath.Join(gaxFolder, "index.md"), resume, sig)
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)

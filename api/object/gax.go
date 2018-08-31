@@ -204,7 +204,9 @@ type CfgPerson struct {
 }
 
 type CfgHost struct {
-	*CfgObject
+	Dbid      string `json:"dbid"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
 	Ipaddress string `json:"ipaddress"`
 	Scsdbid   string `json:"scsdbid"`
 	Subtype   string `json:"subtype"`
@@ -229,7 +231,9 @@ type Options struct {
 }
 
 type CfgApplication struct {
-	*CfgObject
+	Dbid       string `json:"dbid"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
 	Appservers struct {
 		Conninfo []struct {
 			Mode          string `json:"mode"`
