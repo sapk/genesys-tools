@@ -70,33 +70,6 @@ func formatHost(name, dbid string, links *string, linksCount *int, data map[stri
 	return ret
 }
 func formatDotHost(name, dbid string, links *string, linksCount *int, data map[string][]interface{}) string {
-	/*
-		ret := "\"" + dbid + "\" [shape = \"record\";label = \"<f0> " + name
-		for _, a := range data["CfgApplication"] {
-			var app object.CfgApplication
-			err := mapstructure.Decode(a, &app)
-			if err != nil {
-				logrus.Warnf("Fail to convert to CfgApplication")
-				continue
-			}
-			if dbid == app.Hostdbid {
-				ret += fmt.Sprintf("| <%s> %s", app.Dbid, app.Name)
-				for _, c := range app.Appservers.Conninfo {
-					r := findObj("CfgApplication", c.Appserverdbid, data)
-					var remote object.CfgApplication
-					err := mapstructure.Decode(r, &remote)
-					if err != nil {
-						logrus.Warnf("Fail to convert to CfgApplication")
-						continue
-					}
-					*links += fmt.Sprintf("\"%s\":%s -> \"%s\":%s [id = %d];\n", dbid, app.Dbid, remote.Hostdbid, remote.Dbid, *linksCount)
-					*linksCount++
-				}
-
-			}
-		}
-		ret += "\"];\n"
-	*/
 
 	ret := "  subgraph cluster_" + dbid + " {\n"
 	ret += "    label = \"" + name + "\";\n"
@@ -143,27 +116,18 @@ func formatDotHost(name, dbid string, links *string, linksCount *int, data map[s
 					continue
 				}
 
-				remoteport := c.ID
-				/*
-					for _, p := range remote.Portinfos.Portinfo {
-						if p.ID == c.ID {
-							remoteport = p.Port
-							break
-						}
-					}
-				*/
 				//TODO line backup primaire
 				if c.Mode == "CFGTMBoth" {
 					if remote.Hostdbid != app.Hostdbid {
-						*links += fmt.Sprintf("\"%s\":name -> \"%s\":%s [color=green3,id = %d];\n", app.Dbid, remote.Dbid, remoteport, *linksCount)
+						*links += fmt.Sprintf("\"%s\":name -> \"%s\":%s [color=green3,id = %d];\n", app.Dbid, remote.Dbid, c.ID, *linksCount)
 					} else {
-						*links += fmt.Sprintf("\"%s\":name -> \"%s\":%s [style=dashed,color=green3,id = %d];\n", app.Dbid, remote.Dbid, remoteport, *linksCount)
+						*links += fmt.Sprintf("\"%s\":name -> \"%s\":%s [style=dashed,color=green3,id = %d];\n", app.Dbid, remote.Dbid, c.ID, *linksCount)
 					}
 				} else {
 					if remote.Hostdbid != app.Hostdbid {
-						*links += fmt.Sprintf("\"%s\":name -> \"%s\":%s [id = %d];\n", app.Dbid, remote.Dbid, remoteport, *linksCount)
+						*links += fmt.Sprintf("\"%s\":name -> \"%s\":%s [id = %d];\n", app.Dbid, remote.Dbid, c.ID, *linksCount)
 					} else {
-						*links += fmt.Sprintf("\"%s\":name -> \"%s\":%s [style=dotted,id = %d];\n", app.Dbid, remote.Dbid, remoteport, *linksCount)
+						*links += fmt.Sprintf("\"%s\":name -> \"%s\":%s [style=dotted,id = %d];\n", app.Dbid, remote.Dbid, c.ID, *linksCount)
 					}
 				}
 				*linksCount++
@@ -181,15 +145,47 @@ func formatDotHost(name, dbid string, links *string, linksCount *int, data map[s
 
 	return ret + "  }\n"
 }
-func GenerateDotGraph(data map[string][]interface{}) string {
+
+func GenerateDotGraphByApp(data map[string][]interface{}) string {
 	links := "\n"
 	linksCount := 0
 	ret := "digraph g {\n"
 	ret += " graph [rankdir = \"LR\"];\n"
-	//ret += " graph [rankdir = \"TD\"];\n"
-	//ret += " node [fontsize = \"16\",shape = \"ellipse\"];\n"
-	//	ret += " edge [];\n"
+	for _, h := range data["CfgHost"] {
+		host := h.(map[string]interface{})
+		ret += formatDotHost(host["name"].(string), host["dbid"].(string), &links, &linksCount, data)
+	}
+	//Repass apps for apps without host
+	ret += formatDotHost("Non définit", "0", &links, &linksCount, data)
+	ret += formatDotHost("Non applicable", "", &links, &linksCount, data)
 
+	//ORder outsite host to override blocks
+	appTypes := make(map[string][]*object.CfgApplication)
+	for _, a := range data["CfgApplication"] {
+		var app object.CfgApplication
+		err := mapstructure.Decode(a, &app)
+		if err != nil {
+			logrus.Warnf("Fail to convert to CfgApplication")
+			continue
+		}
+		appTypes[app.Subtype] = append(appTypes[app.Subtype], &app)
+	}
+	//{rank = same; B; D; Y;}
+	for _, appT := range appTypes {
+		ret += "{rank = same; "
+		for _, app := range appT {
+			ret += app.Dbid + "; "
+		}
+		ret += "}\n"
+	}
+
+	return ret + links + "}\n"
+}
+func GenerateDotGraphByHost(data map[string][]interface{}) string {
+	links := "\n"
+	linksCount := 0
+	ret := "digraph g {\n"
+	ret += " graph [rankdir = \"LR\"];\n"
 	for _, h := range data["CfgHost"] {
 		host := h.(map[string]interface{})
 		ret += formatDotHost(host["name"].(string), host["dbid"].(string), &links, &linksCount, data)
