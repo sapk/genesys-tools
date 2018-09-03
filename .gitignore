@@ -1,4 +1,11 @@
 *.json
+*.md
+!README.md
+*.dot
+*.zip
+*.png
+*.svg
+
 Applications/
 Hosts/
 DNs/

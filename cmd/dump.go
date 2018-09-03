@@ -160,6 +160,10 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 				if err != nil {
 					logrus.Panicf("File creation failed : %v", err)
 				}
+				err = fs.WriteToFile(filepath.Join(gaxFolder, "graph.dot"), format.GenerateDotGraph(data), "")
+				if err != nil {
+					logrus.Panicf("File creation failed : %v", err)
+				}
 			}
 			if dumpZip {
 				time.Sleep(250 * time.Millisecond) //Sleep to let the prog release access on file
