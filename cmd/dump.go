@@ -147,7 +147,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 						if name != "" {
 							err = fs.WriteToFile(filepath.Join(outFolder, name+" ("+obj["dbid"].(string)+").md"), format.FormatObj(objType, obj, data), sig)
 							if err != nil {
-								logrus.Panicf("File creation failed : %v", err)
+								logrus.Warnf("File creation failed : %v", err) //Dont't panic and keep continue even in case of error
 							}
 						} else {
 							logrus.Warnf("Ignoring invalid object / %s: %s (%s)", objType.Name, name, obj["dbid"])
