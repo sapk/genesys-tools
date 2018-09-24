@@ -152,6 +152,7 @@ func GetFileName(obj map[string]interface{}) string {
 		if ok {
 			name = strings.Replace(name, "/", " - ", -1)
 			name = strings.Replace(name, "\\", " - ", -1)
+			name = strings.Replace(name, "?", "-", -1) //Forbidden char ? on windows fs
 			return name
 		}
 	}
