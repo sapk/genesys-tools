@@ -43,9 +43,10 @@ func init() {
 			wr := csv.NewWriter(buf)
 			val, ok := obj["hostdbid"] //TODO use app.Hostdbid
 			if ok {
-				wr.Write([]string{app.Dbid, app.Name, app.Version, funcFindByType("CfgHost")(val, data), portList})
+				//TODO add folder
+				wr.Write([]string{app.Dbid, app.Name, trimCFGString(app.Subtype), app.Version, funcFindByType("CfgHost")(val, data), portList, trimCFGString(app.State), app.Backupserverdbid})
 			} else {
-				wr.Write([]string{app.Dbid, app.Name, app.Version, "", portList}) //empty host
+				wr.Write([]string{app.Dbid, app.Name, trimCFGString(app.Subtype), app.Version, "", portList, trimCFGString(app.State), app.Backupserverdbid}) //empty host
 			}
 			wr.Flush()
 			return buf.String()
@@ -75,6 +76,10 @@ func getApplicationPorts(app object.CfgApplication) (int, string) {
 		portList += "  " + val.(string) + " / " + port + "  \n"
 	}
 	return ports.Size(), portList
+}
+
+func trimCFGString(srt string) string {
+	return strings.TrimPrefix(srt, "CFG")
 }
 
 func formatApplication(obj map[string]interface{}, data map[string][]interface{}) string {

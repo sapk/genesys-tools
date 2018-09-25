@@ -129,7 +129,7 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 					var csvFormater func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
 					if dumpCSV {
 						if f, ok := format.FormaterList[objType.Name]; ok && f.FormatCSV != nil {
-							csvData = "dbid,name,version,host,ports\n"
+							csvData = "dbid,name,type,version,host,ports,status,backup\n"
 							csvFormater = f.FormatCSV
 						}
 					}
