@@ -60,7 +60,7 @@ func init() {
 
 var dumpCmd = &cobra.Command{
 	Use:   "dump",
-	Short: "Connect to a GAX server to dump its state",
+	Short: "Connect to a GAX server to dump his state",
 	Long: `Use GAX APIs to get all objects from config server.
 This command can dump multiple gax at a time. One folder for each GAX is created.
 	Ex:  genesys-tools dump 172.18.0.5:8080 hosta hostb:4242`,
