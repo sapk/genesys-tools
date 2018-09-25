@@ -17,6 +17,7 @@ import (
 
 type Formater struct {
 	Format      func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
+	FormatCSV   func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
 	FormatShort func(object.ObjectType, map[string]interface{}) string
 }
 
@@ -52,6 +53,7 @@ var FormaterList = map[string]Formater{
 			ret += dumpBackup(obj)
 			return ret
 		},
+		nil,
 		defaultShortFormater,
 	},
 	"CfgFormat": Formater{
@@ -67,6 +69,7 @@ var FormaterList = map[string]Formater{
 			ret += dumpBackup(obj)
 			return ret
 		},
+		nil,
 		defaultShortFormater,
 	},
 }

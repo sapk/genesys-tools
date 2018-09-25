@@ -2,7 +2,10 @@
 package format
 
 import (
+	"bytes"
+	"encoding/csv"
 	"fmt"
+	"strings"
 
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/mitchellh/mapstructure"
@@ -25,6 +28,28 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
+		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+			var app object.CfgApplication
+			err := mapstructure.Decode(obj, &app)
+			if err != nil {
+				logrus.Warnf("Fail to convert to CfgApplication")
+				return err.Error()
+			}
+			_, portList := getApplicationPorts(app)
+			portList = strings.Replace(portList, " ", "", -1)
+			portList = strings.Replace(portList, "\n", ",", -1)
+			portList = strings.Trim(portList, ",")
+			buf := new(bytes.Buffer)
+			wr := csv.NewWriter(buf)
+			val, ok := obj["hostdbid"] //TODO use app.Hostdbid
+			if ok {
+				wr.Write([]string{app.Dbid, app.Name, app.Version, funcFindByType("CfgHost")(val, data), portList})
+			} else {
+				wr.Write([]string{app.Dbid, app.Name, app.Version, "", portList}) //empty host
+			}
+			wr.Flush()
+			return buf.String()
+		},
 		func(objType object.ObjectType, obj map[string]interface{}) string {
 			name := GetFileName(obj)
 			/* Short should not need acces to data
@@ -38,6 +63,20 @@ func init() {
 	}
 }
 
+func getApplicationPorts(app object.CfgApplication) (int, string) {
+	ports := treemap.NewWithStringComparator()
+	for _, p := range app.Portinfos.Portinfo {
+		ports.Put(p.Port, p.ID)
+	}
+	portList := ""
+	for _, id := range ports.Keys() {
+		port := id.(string)
+		val, _ := ports.Get(port)
+		portList += "  " + val.(string) + " / " + port + "  \n"
+	}
+	return ports.Size(), portList
+}
+
 func formatApplication(obj map[string]interface{}, data map[string][]interface{}) string {
 	var app object.CfgApplication
 	err := mapstructure.Decode(obj, &app)
@@ -45,18 +84,9 @@ func formatApplication(obj map[string]interface{}, data map[string][]interface{}
 		logrus.Warnf("Fail to convert to CfgApplication")
 		return err.Error()
 	}
-	ports := treemap.NewWithStringComparator() //TODO pass to int comparator ?
-	for _, p := range app.Portinfos.Portinfo {
-		ports.Put(p.Port, p.ID)
-	}
 
-	portList := ""
-	for _, id := range ports.Keys() {
-		port := id.(string)
-		val, _ := ports.Get(port)
-		portList += "  " + val.(string) + " / " + port + "  \n"
-	}
-	ret := fmt.Sprintf("## Listening ports (%d): \n", ports.Size())
+	portSize, portList := getApplicationPorts(app)
+	ret := fmt.Sprintf("## Listening ports (%d): \n", portSize)
 	ret += portList
 	ret += "\n"
 

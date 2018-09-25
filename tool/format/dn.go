@@ -26,6 +26,7 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
+		nil,
 		defaultShortFormater,
 	}
 	FormaterList["CfgDNGroup"] = Formater{
@@ -75,6 +76,7 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
+		nil,
 		defaultShortFormater,
 	}
 }

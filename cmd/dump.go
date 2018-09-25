@@ -27,6 +27,7 @@ var (
 	dumpZip      bool
 	dumpNoJSON   bool
 	dumpOnlyJSON bool
+	dumpCSV      bool
 	dumpFromJSON string
 	dumpUsername string
 	dumpPassword string
@@ -48,6 +49,7 @@ var (
 func init() {
 	dumpCmd.Flags().BoolVarP(&dumpFull, "extended", "e", false, "[WIP] Get also switch, dn, person, place, ...")
 	dumpCmd.Flags().BoolVarP(&dumpZip, "zip", "z", false, "zip the output folder")
+	dumpCmd.Flags().BoolVar(&dumpCSV, "csv", false, "output some csv table for some type (ex: Application)")
 	dumpCmd.Flags().BoolVar(&dumpNoJSON, "no-json", false, "Disable global json dump")
 	dumpCmd.Flags().BoolVar(&dumpOnlyJSON, "only-json", false, "Dump only global json")
 	dumpCmd.Flags().StringVarP(&dumpFromJSON, "from-json", "f", "", "Read data from JSON and not a live GAX (directory containing all json)")
@@ -122,6 +124,15 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 					if !objType.IsDumpable {
 						continue //Skip
 					}
+
+					csvData := ""
+					var csvFormater func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
+					if dumpCSV {
+						if f, ok := format.FormaterList[objType.Name]; ok && f.FormatCSV != nil {
+							csvData = "dbid,name,version,host,ports\n"
+							csvFormater = f.FormatCSV
+						}
+					}
 					//TODO skip if empty array ?
 					outFolder := filepath.Join(gaxFolder, objType.Desc)
 					if _, err := os.Stat(outFolder); err == nil {
@@ -145,12 +156,22 @@ This command can dump multiple gax at a time. One folder for each GAX is created
 						logrus.Infof("%s: %s (%s)", objType.Name, name, obj["dbid"])
 
 						if name != "" {
+							if csvFormater != nil {
+								csvData += csvFormater(objType, obj, data)
+							}
 							err = fs.WriteToFile(filepath.Join(outFolder, name+" ("+obj["dbid"].(string)+").md"), format.FormatObj(objType, obj, data), sig)
 							if err != nil {
 								logrus.Warnf("File creation failed : %v", err) //Dont't panic and keep continue even in case of error
 							}
 						} else {
 							logrus.Warnf("Ignoring invalid object / %s: %s (%s)", objType.Name, name, obj["dbid"])
+						}
+					}
+					//Dump CSV at end
+					if csvFormater != nil {
+						err := fs.WriteToFile(filepath.Join(gaxFolder, objType.Desc+".csv"), csvData, "")
+						if err != nil {
+							logrus.Panicf("CSV failed : %v", err)
 						}
 					}
 					resume += "\n"

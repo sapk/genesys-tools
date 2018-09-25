@@ -24,6 +24,7 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
+		nil,
 		defaultShortFormater,
 	}
 }

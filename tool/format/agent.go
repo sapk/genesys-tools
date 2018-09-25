@@ -24,6 +24,7 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
+		nil,
 		defaultShortFormater,
 	}
 
@@ -38,6 +39,7 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
+		nil,
 		func(objType object.ObjectType, obj map[string]interface{}) string {
 			name := GetFileName(obj)
 			displayname := strings.TrimSpace(catchNotString(obj["firstname"]) + " " + catchNotString(obj["lastname"]))
@@ -60,6 +62,7 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
+		nil,
 		defaultShortFormater,
 	}
 }
