@@ -8,7 +8,8 @@ import (
 )
 
 func WriteToFile(file, data, sig string) error {
-	f, err := os.Create(file)
+	//f, err := os.Create(file)
+	f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_TRUNC|os.O_EXCL, 0666)
 	if err != nil {
 		return err
 	}

@@ -197,13 +197,13 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 		}
 	}
 	if dumpZip {
-		time.Sleep(250 * time.Millisecond) //Sleep to let the prog release access on file
+		//time.Sleep(250 * time.Millisecond) //Sleep to let the prog release access on file
 		logrus.Infof("Compacting folder: %s", gaxFolder)
 		err := fs.RecursiveZip(gaxFolder, gaxFolder+".zip")
 		if err != nil {
 			logrus.Panicf("Failed to zip folder : %v", err)
 		}
-		time.Sleep(250 * time.Millisecond) //Sleep to let the prog release access on file
+		//time.Sleep(250 * time.Millisecond) //Sleep to let the prog release access on file
 		err = fs.Clean(gaxFolder)
 		if err != nil {
 			logrus.Warnf("Clean up failed (I will retry in 15 secs) : %v", err)
