@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 
@@ -111,16 +112,26 @@ func (c *Client) newRequest(method, path string, body interface{}) (*http.Reques
 	rel := &url.URL{Path: path}
 	u := c.BaseURL.ResolveReference(rel)
 
-	var buf io.ReadWriter
-	if body != nil {
-		buf = new(bytes.Buffer)
-		err := json.NewEncoder(buf).Encode(body)
-		if err != nil {
-			return nil, err
+	var (
+		err error
+		req *http.Request
+	)
+
+	data, ok := body.(string)
+	if ok { //Support string body to send direct
+		req, err = http.NewRequest(method, u.String(), strings.NewReader(data))
+	} else { //Or convert to json
+		var buf io.ReadWriter
+		if body != nil {
+			buf = new(bytes.Buffer)
+			e := json.NewEncoder(buf).Encode(body)
+			if e != nil {
+				return nil, err
+			}
 		}
+		req, err = http.NewRequest(method, u.String(), buf)
 	}
 
-	req, err := http.NewRequest(method, u.String(), buf)
 	if err != nil {
 		return nil, err
 	}
