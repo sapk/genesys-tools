@@ -8,12 +8,12 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 
-	"github.com/sapk/genesys-tools/api/object"
+	"github.com/sapk/go-genesys/api/object"
 )
 
 func init() {
 	FormaterList["CfgHost"] = Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			ret := "# " + obj["name"].(string) + "\n"
 			ret += "\n"
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/sapk/genesys-tools/api/object"
+	"github.com/sapk/go-genesys/api/object"
 	"github.com/sirupsen/logrus"
 )
 

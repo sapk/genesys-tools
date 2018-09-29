@@ -7,13 +7,13 @@ import (
 
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/mitchellh/mapstructure"
-	"github.com/sapk/genesys-tools/api/object"
+	"github.com/sapk/go-genesys/api/object"
 	"github.com/sirupsen/logrus"
 )
 
 func init() {
 	FormaterList["CfgAgentGroup"] = Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			ret := "# " + obj["name"].(string) + "\n"
 			ret += "\n"
 
@@ -29,7 +29,7 @@ func init() {
 	}
 
 	FormaterList["CfgPerson"] = Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			ret := "# " + obj["username"].(string) + "\n"
 			ret += "\n"
 			ret += dumpAvailableInformation(obj, data) + "\n"
@@ -40,7 +40,7 @@ func init() {
 			return ret
 		},
 		nil,
-		func(objType object.ObjectType, obj map[string]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}) string {
 			name := GetFileName(obj)
 			displayname := strings.TrimSpace(catchNotString(obj["firstname"]) + " " + catchNotString(obj["lastname"]))
 			if displayname == "" {
@@ -51,7 +51,7 @@ func init() {
 		},
 	}
 	FormaterList["CfgAccessGroup"] = Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			ret := "# " + obj["name"].(string) + "\n"
 			ret += "\n"
 

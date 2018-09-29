@@ -15,11 +15,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/sapk/genesys-tools/api/client"
-	"github.com/sapk/genesys-tools/api/object"
 	"github.com/sapk/genesys-tools/tool/check"
 	"github.com/sapk/genesys-tools/tool/format"
 	"github.com/sapk/genesys-tools/tool/fs"
+	"github.com/sapk/go-genesys/api/client"
+	"github.com/sapk/go-genesys/api/object"
 )
 
 var (
@@ -107,9 +107,9 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 		}
 	}
 
-	list := object.ObjectTypeListShort
+	list := object.TypeListShort
 	if dumpFull {
-		list = object.ObjectTypeList
+		list = object.TypeList
 	}
 	//Get DATA
 	data := getData(dumpFromJSON, gax, dumpUsername, dumpPassword, list)
@@ -132,7 +132,7 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 			}
 
 			csvData := ""
-			var csvFormater func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
+			var csvFormater func(object.Type, map[string]interface{}, map[string][]interface{}) string
 			if dumpCSV {
 				if f, ok := format.FormaterList[objType.Name]; ok && f.FormatCSV != nil {
 					csvData = "dbid,name,type,version,host,ports,status,backup\n"
@@ -215,14 +215,14 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 		}
 	}
 }
-func getData(dumpFromJSON, gax, dumpUsername, dumpPassword string, list []object.ObjectType) map[string][]interface{} {
+func getData(dumpFromJSON, gax, dumpUsername, dumpPassword string, list []object.Type) map[string][]interface{} {
 	if dumpFromJSON == "" {
 		return getGAXData(gax, dumpUsername, dumpPassword, list)
 	}
 	return getJSONData(dumpFromJSON, gax, list)
 }
 
-func getJSONData(dumpFromJSON, gax string, list []object.ObjectType) map[string][]interface{} {
+func getJSONData(dumpFromJSON, gax string, list []object.Type) map[string][]interface{} {
 	var res = make(map[string][]interface{})
 	gaxFolder := strings.Replace(gax, ":", "-", -1)
 	for _, objType := range list {
@@ -241,7 +241,7 @@ func getJSONData(dumpFromJSON, gax string, list []object.ObjectType) map[string]
 	}
 	return res
 }
-func getGAXData(gax, dumpUsername, dumpPassword string, list []object.ObjectType) map[string][]interface{} {
+func getGAXData(gax, dumpUsername, dumpPassword string, list []object.Type) map[string][]interface{} {
 	if !strings.Contains(gax, ":") {
 		//By default use port 8080
 		gax += ":8080"

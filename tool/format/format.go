@@ -12,16 +12,16 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 
-	"github.com/sapk/genesys-tools/api/object"
+	"github.com/sapk/go-genesys/api/object"
 )
 
 type Formater struct {
-	Format      func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
-	FormatCSV   func(object.ObjectType, map[string]interface{}, map[string][]interface{}) string
-	FormatShort func(object.ObjectType, map[string]interface{}) string
+	Format      func(object.Type, map[string]interface{}, map[string][]interface{}) string
+	FormatCSV   func(object.Type, map[string]interface{}, map[string][]interface{}) string
+	FormatShort func(object.Type, map[string]interface{}) string
 }
 
-func defaultShortFormater(objType object.ObjectType, obj map[string]interface{}) string {
+func defaultShortFormater(objType object.Type, obj map[string]interface{}) string {
 	name := GetFileName(obj)
 	//TODO better
 	if obj["dbid"] != nil {
@@ -42,7 +42,7 @@ func defaultShortFormater(objType object.ObjectType, obj map[string]interface{})
 
 var FormaterList = map[string]Formater{
 	"default": Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			name := GetFileName(obj)
 			ret := "# " + name + "\n"
 			ret += "\n"
@@ -57,7 +57,7 @@ var FormaterList = map[string]Formater{
 		defaultShortFormater,
 	},
 	"CfgFormat": Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			name := GetFileName(obj)
 			ret := "# " + name + "\n"
 			ret += "\n"
@@ -329,8 +329,8 @@ func formatOptions(obj map[string]interface{}, data map[string][]interface{}) st
 	ret += "  \n"
 	return ret
 }
-func GetObjectType(obj map[string]interface{}) *object.ObjectType {
-	for _, o := range object.ObjectTypeList {
+func GetObjectType(obj map[string]interface{}) *object.Type {
+	for _, o := range object.TypeList {
 		if obj["type"].(string) == o.Name {
 			return &o
 		}
@@ -362,7 +362,7 @@ func FormatShortObj(obj map[string]interface{}) string {
 }
 
 //Call the good formatter if exist or use the default
-func FormatObj(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+func FormatObj(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 	if f, ok := FormaterList[objType.Name]; ok {
 		return f.Format(objType, obj, data)
 	}

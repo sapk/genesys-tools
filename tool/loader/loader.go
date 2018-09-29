@@ -2,8 +2,8 @@
 package loader
 
 import (
-	"github.com/sapk/genesys-tools/api/client"
 	"github.com/sapk/genesys-tools/tool/format"
+	"github.com/sapk/go-genesys/api/client"
 
 	"github.com/c-bata/go-prompt"
 	"github.com/sirupsen/logrus"

@@ -8,14 +8,14 @@ import (
 
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/mitchellh/mapstructure"
-	"github.com/sapk/genesys-tools/api/object"
+	"github.com/sapk/go-genesys/api/object"
 	"github.com/sirupsen/logrus"
 	//"github.com/sirupsen/logrus"
 )
 
 func init() {
 	FormaterList["CfgDN"] = Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			ret := "# " + obj["number"].(string) + "\n"
 			ret += "\n"
 
@@ -30,7 +30,7 @@ func init() {
 		defaultShortFormater,
 	}
 	FormaterList["CfgDNGroup"] = Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			ret := "# " + obj["name"].(string) + "\n"
 			ret += "\n"
 

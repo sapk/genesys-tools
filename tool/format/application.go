@@ -11,12 +11,12 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 
-	"github.com/sapk/genesys-tools/api/object"
+	"github.com/sapk/go-genesys/api/object"
 )
 
 func init() {
 	FormaterList["CfgApplication"] = Formater{
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			ret := "# " + obj["name"].(string) + "\n"
 			ret += "\n"
 
@@ -28,7 +28,7 @@ func init() {
 			ret += dumpBackup(obj)
 			return ret
 		},
-		func(objType object.ObjectType, obj map[string]interface{}, data map[string][]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}, data map[string][]interface{}) string {
 			var app object.CfgApplication
 			err := mapstructure.Decode(obj, &app)
 			if err != nil {
@@ -51,7 +51,7 @@ func init() {
 			wr.Flush()
 			return buf.String()
 		},
-		func(objType object.ObjectType, obj map[string]interface{}) string {
+		func(objType object.Type, obj map[string]interface{}) string {
 			name := GetFileName(obj)
 			/* Short should not need acces to data
 			if obj["hostdbid"] != nil && obj["hostdbid"] != "" {
