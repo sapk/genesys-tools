@@ -150,7 +150,7 @@ func FilterBy(obj map[string]interface{}, data []map[string]interface{}, cmp fun
 	for _, o := range data {
 		if cmp(obj, o) {
 			logrus.WithField("obj", o).Info("Matched object")
-			ret = append(ret, obj) //TODO best allocate
+			ret = append(ret, o) //TODO best allocate
 		}
 	}
 	return ret
