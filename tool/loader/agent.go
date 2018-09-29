@@ -4,8 +4,8 @@ package loader
 import (
 	"reflect"
 
-	"github.com/sapk/go-genesys/api/client"
-	"github.com/sapk/go-genesys/api/object"
+	"github.com/sapk/genesys-tools/api/client"
+	"github.com/sapk/genesys-tools/api/object"
 	"github.com/sirupsen/logrus"
 )
 

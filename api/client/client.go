@@ -12,7 +12,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/sapk/go-genesys/api/object"
+	"github.com/sapk/genesys-tools/api/object"
 )
 
 //Gensys GAX Api client

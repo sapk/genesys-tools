@@ -11,7 +11,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 
-	"github.com/sapk/go-genesys/api/object"
+	"github.com/sapk/genesys-tools/api/object"
 )
 
 func init() {

@@ -4,8 +4,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/sapk/go-genesys/tool/check"
-	"github.com/sapk/go-genesys/tool/render"
+	"github.com/sapk/genesys-tools/tool/check"
+	"github.com/sapk/genesys-tools/tool/render"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

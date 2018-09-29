@@ -7,7 +7,7 @@ import (
 
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/mitchellh/mapstructure"
-	"github.com/sapk/go-genesys/api/object"
+	"github.com/sapk/genesys-tools/api/object"
 	"github.com/sirupsen/logrus"
 )
 

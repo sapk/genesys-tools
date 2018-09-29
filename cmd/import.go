@@ -11,10 +11,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/sapk/go-genesys/api/client"
-	"github.com/sapk/go-genesys/tool/check"
-	"github.com/sapk/go-genesys/tool/format"
-	"github.com/sapk/go-genesys/tool/loader"
+	"github.com/sapk/genesys-tools/api/client"
+	"github.com/sapk/genesys-tools/tool/check"
+	"github.com/sapk/genesys-tools/tool/format"
+	"github.com/sapk/genesys-tools/tool/loader"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
