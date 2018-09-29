@@ -222,16 +222,19 @@ type Userproperties struct {
 		Key     string `json:"key"`
 	} `json:"property"`
 }
+
 type Options struct {
-	Property []struct {
-		Section string `json:"section"`
-		Value   string `json:"value"`
-		Key     string `json:"key"`
-	} `json:"property"`
+	Property []Property `json:"property"`
+}
+
+type Property struct {
+	Section string `json:"section"`
+	Value   string `json:"value"`
+	Key     string `json:"key"`
 }
 
 type CfgApplication struct {
-	Dbid       string `json:"dbid"`
+	Dbid       string `json:"dbid,omitempty"`
 	Name       string `json:"name"`
 	Type       string `json:"type"`
 	Appservers struct {
@@ -274,6 +277,12 @@ type CfgApplication struct {
 	Resources     struct {
 		Resource []interface{} `json:"resource"`
 	} `json:"resources"`
+	Tenantdbids struct {
+		ID []struct {
+			Dbid string `json:"dbid"`
+		} `json:"id"`
+		Mode string `json:"mode"`
+	} `json:"tenantdbids"`
 	Startuptimeout   string `json:"startuptimeout"`
 	Backupserverdbid string `json:"backupserverdbid"`
 	Version          string `json:"version"`

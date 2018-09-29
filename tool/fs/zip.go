@@ -10,7 +10,9 @@ import (
 
 //From https://stackoverflow.com/questions/49057032/recursively-zipping-a-directory-in-golang
 func RecursiveZip(pathToZip, destinationPath string) error {
-	destinationFile, err := os.Create(destinationPath)
+	//destinationFile, err := os.Create(destinationPath)
+	Clean(destinationPath) //Remove previous file if needed
+	destinationFile, err := os.OpenFile(destinationPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC|os.O_EXCL, 0666)
 	if err != nil {
 		return err
 	}
