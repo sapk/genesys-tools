@@ -247,7 +247,7 @@ func getGAXData(gax, dumpUsername, dumpPassword string, list []object.Type) map[
 		gax += ":8080"
 	}
 	//Login
-	c := client.NewClient(gax)
+	c := client.NewClient(gax, false)
 	user, err := c.Login(dumpUsername, dumpPassword)
 	if err != nil {
 		logrus.Panicf("Login failed : %v", err)

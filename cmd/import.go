@@ -88,7 +88,7 @@ var importCmd = &cobra.Command{
 			defaults[tmp[0]] = tmp[1]
 		}
 		//Login
-		c := client.NewClient(gax)
+		c := client.NewClient(gax, false)
 		user, err := c.Login(importUsername, importPassword)
 		if err != nil {
 			logrus.Panicf("Login failed : %v", err)
