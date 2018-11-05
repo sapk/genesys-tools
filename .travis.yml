@@ -1,0 +1,17 @@
+language: go
+
+go:
+  - "1.11"
+
+install: make deps
+
+script: make build
+
+before_deploy: make release
+deploy:
+  provider: releases
+  file_glob: true
+  file: build/*
+  skip_cleanup: true
+  on:
+    tags: true
