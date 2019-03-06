@@ -1,4 +1,8 @@
 language: go
+addons:
+  apt:
+    packages:
+    - upx-ucl
 go:
   - "1.12"
 env:
