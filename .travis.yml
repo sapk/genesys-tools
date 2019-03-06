@@ -1,16 +1,15 @@
 language: go
-
 go:
   - "1.12"
 
 install: make deps
-
 script: make build
-
 before_deploy: make release
 deploy:
   provider: releases
   file_glob: true
+  api_key:
+    secure: b+ferbUE6T16pzi70hzxPO/o4myb44ftxUbIWE2Y8bykAqboXVHoZX0O2yU3qqO3F/S0b4KwZLNN26MAC1CzRERkzEsgUK/F/trTEltdbPG9WaS8GWMWQxA+pkJTymwt6CT7U0QVUQrdPdO4ndBQ9DooqNUaOvVVA5lQCiyg4YWa0/arRrylUKbR1rxGVHLQ6vJCWvdbYDXzCu+piz93vYkRx+uP+ZaojDMM3wn954DyhEq2zApQ2/3t1D0eXPZlYONAg1+OlzJdHRULJvK7zTEXnqb4KWvOtHP1z1M5X8lPWrkbaVkzfrj8N1Ein3YwQQ9sSYSx1rAymcijFYN0lNrTDAwlW6OiztOeRpU1SG/CXQ6+uPYTdh+ZmInVYy/W/NeOO/ILvGH06OlgFFUawI0uxljE5RQkIFwc8eJudY7SNLC4ICjmJqmsX0ptByk5Lod7XcIv+mOjYDDVEl2pBYUleSAqOzvuG54bOaOlu+MCoU3kylIbKzcWZVm3UHrfFQUO63UhdxE5Rp9pEPkdr2Tz8WpfkEdzYLR/aH9wOnBt+bzPMOcka2HfKF9QqeXQvW98UQ+c9DYFhchB2cqi1spTruVGAD++r07qSJb3AXDLY/6LSU1sK+1BhqP3II4jFNetmLwYQeHM2YUJDIKIPLRDva8AGWHXi8zUeJmANcc=
   file: build/*
   skip_cleanup: true
   on:
