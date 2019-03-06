@@ -6,6 +6,8 @@ GIT_HASH=$(shell git rev-parse --short HEAD)
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 DATE := $(shell date -u '+%Y-%m-%d-%H%M-UTC' | base64)
 
+GO111MODULE=on
+
 LDFLAGS = \
   -s -w \
 -X $(APP_PACKAGE)/cmd.Version=$(APP_VERSION) -X $(APP_PACKAGE)/cmd.Branch=$(GIT_BRANCH) -X $(APP_PACKAGE)/cmd.Commit=$(GIT_HASH) -X $(APP_PACKAGE)/cmd.BuildTime=$(DATE)
@@ -24,11 +26,11 @@ release: clean format
 	gox -ldflags "$(LDFLAGS)" -output="build/$(APP_NAME)-{{.OS}}-{{.Arch}}"
 	@upx build/$(APP_NAME)-* || true
 
-deps:
+deps: export GO111MODULE=on
 	@echo -e "$(OK_COLOR)==> Installing dependencies ...$(NO_COLOR)"
-	@go get -u -v github.com/golang/dep/cmd/dep #Vendoring
 	@go get -u -v github.com/mitchellh/gox #Build tool
-	@$(GOPATH)/bin/dep ensure
+	@go mod tidy
+	@go mod vendor
 
 clean:
 	@if [ -x $(APP_NAME) ]; then rm $(APP_NAME); fi
@@ -39,7 +41,7 @@ format:
 	@echo -e "$(OK_COLOR)==> Formatting...$(NO_COLOR)"
 	go fmt ./...
 
-compile:
+compile: export GO111MODULE=on
 	@echo -e "$(OK_COLOR)==> Building...$(NO_COLOR)"
 	go build -v -ldflags "$(LDFLAGS)" -o $(APP_NAME)
 
