@@ -27,6 +27,7 @@ release: clean format
 deps:
 	@echo -e "$(OK_COLOR)==> Installing dependencies ...$(NO_COLOR)"
 	@go get -u -v github.com/golang/dep/cmd/dep #Vendoring
+	@go get -u -v github.com/mitchellh/gox #Build tool
 	@$(GOPATH)/bin/dep ensure
 
 clean:
