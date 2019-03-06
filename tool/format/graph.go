@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/rs/zerolog/log"
 	"github.com/sapk/go-genesys/api/object"
-	"github.com/sirupsen/logrus"
 )
 
 //TODO grpah macro between host ?
@@ -18,7 +18,7 @@ func formatHost(name, dbid string, links *string, linksCount *int, data map[stri
 		var app object.CfgApplication
 		err := mapstructure.Decode(a, &app)
 		if err != nil {
-			logrus.Warnf("Fail to convert to CfgApplication")
+			log.Warn().Msgf("Fail to convert to CfgApplication")
 			continue
 		}
 		if dbid == app.Hostdbid {
@@ -41,7 +41,7 @@ func formatHost(name, dbid string, links *string, linksCount *int, data map[stri
 				var remote object.CfgApplication
 				err := mapstructure.Decode(r, &remote)
 				if err != nil {
-					logrus.Warnf("Fail to convert to CfgApplication")
+					log.Warn().Msgf("Fail to convert to CfgApplication")
 					continue
 				}
 				//TODO Color when c.Mode = CFGTMBoth
@@ -86,7 +86,7 @@ func formatDotHost(name, dbid string, links *string, linksCount *int, data map[s
 		var app object.CfgApplication
 		err := mapstructure.Decode(a, &app)
 		if err != nil {
-			logrus.Warnf("Fail to convert to CfgApplication")
+			log.Warn().Msgf("Fail to convert to CfgApplication")
 			continue
 		}
 		if dbid == app.Hostdbid {
@@ -112,7 +112,7 @@ func formatDotHost(name, dbid string, links *string, linksCount *int, data map[s
 				var remote object.CfgApplication
 				err := mapstructure.Decode(r, &remote)
 				if err != nil {
-					logrus.Warnf("Fail to convert to CfgApplication")
+					log.Warn().Msgf("Fail to convert to CfgApplication")
 					continue
 				}
 
@@ -165,7 +165,7 @@ func GenerateDotGraphByApp(data map[string][]interface{}) string {
 		var app object.CfgApplication
 		err := mapstructure.Decode(a, &app)
 		if err != nil {
-			logrus.Warnf("Fail to convert to CfgApplication")
+			log.Warn().Msgf("Fail to convert to CfgApplication")
 			continue
 		}
 		appTypes[app.Subtype] = append(appTypes[app.Subtype], &app)
@@ -200,7 +200,7 @@ func GenerateDotGraphByHost(data map[string][]interface{}) string {
 			var app object.CfgApplication
 			err := mapstructure.Decode(a, &app)
 			if err != nil {
-				logrus.Warnf("Fail to convert to CfgApplication")
+				log.Warn().Msgf("Fail to convert to CfgApplication")
 				continue
 			}
 			appTypes[app.Subtype] = append(appTypes[app.Subtype], &app)

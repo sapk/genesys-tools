@@ -9,7 +9,7 @@ import (
 
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/mitchellh/mapstructure"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 
 	"github.com/sapk/go-genesys/api/object"
 )
@@ -32,7 +32,7 @@ func init() {
 			var app object.CfgApplication
 			err := mapstructure.Decode(obj, &app)
 			if err != nil {
-				logrus.Warnf("Fail to convert to CfgApplication")
+				log.Warn().Msgf("Fail to convert to CfgApplication")
 				return err.Error()
 			}
 			_, portList := getApplicationPorts(app)
@@ -86,7 +86,7 @@ func formatApplication(obj map[string]interface{}, data map[string][]interface{}
 	var app object.CfgApplication
 	err := mapstructure.Decode(obj, &app)
 	if err != nil {
-		logrus.Warnf("Fail to convert to CfgApplication")
+		log.Warn().Msgf("Fail to convert to CfgApplication")
 		return err.Error()
 	}
 

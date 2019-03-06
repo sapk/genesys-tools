@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 //TODO add test
@@ -25,21 +25,14 @@ const (
 func IsIP(arg string) bool {
 	rIPv4 := regexp.MustCompile(`^` + validIPv4AddressRegex + `$`)
 	rIPv6 := regexp.MustCompile(`^` + validIPv6AddressRegex + `$`)
-	logrus.WithFields(logrus.Fields{
-		"arg":    arg,
-		"isIPv4": rIPv4.MatchString(arg),
-		"isIPv6": rIPv6.MatchString(arg),
-	}).Debug("parsing arg")
+	log.Debug().Str("arg", arg).Bool("isIPv4", rIPv4.MatchString(arg)).Bool("isIPv6", rIPv6.MatchString(arg)).Msg("parsing arg")
 	return rIPv4.MatchString(arg) || rIPv6.MatchString(arg)
 }
 
 //IsHost validate ip args format
 func IsHost(arg string) bool {
 	rHost := regexp.MustCompile(`^` + validHostnameRegex + `$`)
-	logrus.WithFields(logrus.Fields{
-		"arg":    arg,
-		"IsHost": rHost.MatchString(arg),
-	}).Debug("parsing arg")
+	log.Debug().Str("arg", arg).Bool("IsHost", rHost.MatchString(arg)).Msg("parsing arg")
 	return rHost.MatchString(arg)
 }
 
@@ -55,11 +48,7 @@ func IsValidClientArg(arg string) bool {
 		host = tmp[0]
 		port = tmp[1]
 	}
-	logrus.WithFields(logrus.Fields{
-		"arg":    arg,
-		"IsIP":   IsIP(host),
-		"isHost": IsHost(host),
-	}).Debug("parsing arg")
+	log.Debug().Str("arg", arg).Bool("IsIP", IsIP(host)).Bool("IsHost", IsHost(host)).Msg("parsing arg")
 	_, err := strconv.Atoi(port)
 	return err == nil && (IsIP(host) || IsHost(host))
 }

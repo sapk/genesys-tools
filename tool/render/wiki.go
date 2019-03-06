@@ -28,7 +28,7 @@ func (w Wiki) Title() string {
 }
 
 func (w *Wiki) Write(rw http.ResponseWriter) {
-	w.Body = template.HTML(blackfriday.MarkdownCommon(w.Markdown))
+	w.Body = template.HTML(blackfriday.Run(w.Markdown, blackfriday.WithExtensions(blackfriday.CommonExtensions)))
 	err := w.template.Execute(rw, w)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)

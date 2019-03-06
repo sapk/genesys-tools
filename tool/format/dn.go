@@ -8,9 +8,8 @@ import (
 
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/mitchellh/mapstructure"
+	"github.com/rs/zerolog/log"
 	"github.com/sapk/go-genesys/api/object"
-	"github.com/sirupsen/logrus"
-	//"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -38,7 +37,7 @@ func init() {
 			var dnGroup object.CfgDNGroup
 			err := mapstructure.Decode(obj, &dnGroup)
 			if err != nil {
-				logrus.Warnf("Fail to convert to CfgDNGroup")
+				log.Warn().Msgf("Fail to convert to CfgDNGroup")
 				return err.Error()
 			}
 			dns := treemap.NewWithStringComparator()
@@ -59,7 +58,7 @@ func init() {
 					var dn object.CfgDN
 					err := mapstructure.Decode(val, &dn)
 					if err != nil {
-						logrus.Warnf("Fail to convert to CfgDN")
+						log.Warn().Msgf("Fail to convert to CfgDN")
 						dnList += "  dbid:" + number + "\n"
 					} else {
 						dnList += "  " + dn.Number + " (" + dn.Subtype + "/" + dn.Dbid + ")  \n"

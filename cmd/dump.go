@@ -12,7 +12,7 @@ import (
 	//"sort"
 	"strings"
 
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
 	"github.com/sapk/genesys-tools/tool/check"
@@ -67,7 +67,7 @@ var dumpCmd = &cobra.Command{
 This command can dump multiple gax at a time. One folder for each GAX is created.
 	Ex:  genesys-tools dump 172.18.0.5:8080 hosta hostb:4242`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		logrus.Debug("Checking args for dump cmd: ", args)
+		log.Debug().Msgf("Checking args for dump cmd: %v", args)
 		if len(args) < 1 {
 			return fmt.Errorf("requires at least one GAX server")
 		}
@@ -94,18 +94,18 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 	gaxFolder := strings.Replace(gax, ":", "-", -1)
 	//tmp := strings.Split(gax, ":")
 	//host := tmp[0]
-	logrus.Infof("Get info from GAX: %s", gax)
+	log.Info().Msgf("Get info from GAX: %s", gax)
 	if dumpFromJSON == "" { //Create folder if not from restore
 		if _, err := os.Stat(gaxFolder); err == nil {
-			logrus.Warnf("Overwriting old export %s", gaxFolder)
+			log.Warn().Msgf("Overwriting old export %s", gaxFolder)
 			err = fs.Clean(gaxFolder)
 			if err != nil {
-				logrus.Panicf("Clean up failed : %v", err)
+				log.Panic().Msgf("Clean up failed : %v", err)
 			}
 		}
 		err := os.Mkdir(gaxFolder, 0755)
 		if err != nil {
-			logrus.Panicf("Folder creation failed : %v", err)
+			log.Panic().Msgf("Folder creation failed : %v", err)
 		}
 	}
 
@@ -121,7 +121,7 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 		for _, objType := range list {
 			err := fs.DumpToFile(filepath.Join(gaxFolder, objType.Desc+".json"), data[objType.Name])
 			if err != nil {
-				logrus.Panicf("Dump failed : %v", err)
+				log.Panic().Msgf("Dump failed : %v", err)
 			}
 		}
 	}
@@ -147,15 +147,15 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 			//TODO skip if empty array ?
 			outFolder := filepath.Join(gaxFolder, objType.Desc)
 			if _, err := os.Stat(outFolder); err == nil {
-				logrus.Warnf("Overwriting old export %s", outFolder)
+				log.Warn().Msgf("Overwriting old export %s", outFolder)
 				err = fs.Clean(outFolder)
 				if err != nil {
-					logrus.Panicf("Clean up failed : %v", err)
+					log.Panic().Msgf("Clean up failed : %v", err)
 				}
 			}
 			err := os.Mkdir(outFolder, 0755)
 			if err != nil {
-				logrus.Panicf("Folder creation failed : %v", err)
+				log.Panic().Msgf("Folder creation failed : %v", err)
 			}
 			resume += fmt.Sprintf("## %s (%d) :\n", objType.Desc, len(data[objType.Name]))
 			//TODO order objects
@@ -164,7 +164,7 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 				name := format.GetFileName(obj)
 
 				resume += format.FormatShortObj(obj)
-				logrus.Infof("%s: %s (%s)", objType.Name, name, obj["dbid"])
+				log.Info().Msgf("%s: %s (%s)", objType.Name, name, obj["dbid"])
 
 				if name != "" {
 					if csvFormater != nil {
@@ -172,17 +172,17 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 					}
 					err = fs.WriteToFile(filepath.Join(outFolder, name+" ("+obj["dbid"].(string)+").md"), format.FormatObj(objType, obj, data), sig)
 					if err != nil {
-						logrus.Warnf("File creation failed : %v", err) //Dont't panic and keep continue even in case of error
+						log.Warn().Msgf("File creation failed : %v", err) //Dont't panic and keep continue even in case of error
 					}
 				} else {
-					logrus.Warnf("Ignoring invalid object / %s: %s (%s)", objType.Name, name, obj["dbid"])
+					log.Warn().Msgf("Ignoring invalid object / %s: %s (%s)", objType.Name, name, obj["dbid"])
 				}
 			}
 			//Dump CSV at end
 			if csvFormater != nil {
 				err := fs.WriteToFile(filepath.Join(gaxFolder, objType.Desc+".csv"), csvData, "")
 				if err != nil {
-					logrus.Panicf("CSV failed : %v", err)
+					log.Panic().Msgf("CSV failed : %v", err)
 				}
 			}
 			resume += "\n"
@@ -190,32 +190,32 @@ func DumpGaxHost(gax string, dumpFull, dumpZip, dumpNoJSON, dumpOnlyJSON, dumpCS
 		resume += format.GenerateMermaidGraph(data)
 		err := fs.WriteToFile(filepath.Join(gaxFolder, "index.md"), resume, sig)
 		if err != nil {
-			logrus.Panicf("File creation failed : %v", err)
+			log.Panic().Msgf("File creation failed : %v", err)
 		}
 		err = fs.WriteToFile(filepath.Join(gaxFolder, "graph-by-app.dot"), format.GenerateDotGraphByApp(data), "")
 		if err != nil {
-			logrus.Panicf("File creation failed : %v", err)
+			log.Panic().Msgf("File creation failed : %v", err)
 		}
 		err = fs.WriteToFile(filepath.Join(gaxFolder, "graph-by-host.dot"), format.GenerateDotGraphByHost(data), "")
 		if err != nil {
-			logrus.Panicf("File creation failed : %v", err)
+			log.Panic().Msgf("File creation failed : %v", err)
 		}
 	}
 	if dumpZip {
 		//time.Sleep(250 * time.Millisecond) //Sleep to let the prog release access on file
-		logrus.Infof("Compacting folder: %s", gaxFolder)
+		log.Info().Msgf("Compacting folder: %s", gaxFolder)
 		err := fs.RecursiveZip(gaxFolder, gaxFolder+".zip")
 		if err != nil {
-			logrus.Panicf("Failed to zip folder : %v", err)
+			log.Panic().Msgf("Failed to zip folder : %v", err)
 		}
 		//time.Sleep(250 * time.Millisecond) //Sleep to let the prog release access on file
 		err = fs.Clean(gaxFolder)
 		if err != nil {
-			logrus.Warnf("Clean up failed (I will retry in 15 secs) : %v", err)
+			log.Warn().Msgf("Clean up failed (I will retry in 15 secs) : %v", err)
 			time.Sleep(15 * time.Second) //Sleep to let the prog release access on file
 			err = fs.Clean(gaxFolder)
 			if err != nil {
-				logrus.Warnf("Clean up failed again : %v", err)
+				log.Warn().Msgf("Clean up failed again : %v", err)
 			}
 		}
 	}
@@ -235,11 +235,11 @@ func getJSONData(dumpFromJSON, gax string, list []object.Type) map[string][]inte
 		var data []interface{}
 		bytes, err := ioutil.ReadFile(filepath.Join(dumpFromJSON, gaxFolder, objType.Desc+".json"))
 		if err != nil {
-			logrus.Warnf("List %s failed : %v", objType.Name, err)
+			log.Warn().Msgf("List %s failed : %v", objType.Name, err)
 		}
 		err = json.Unmarshal(bytes, &data)
 		if err != nil {
-			logrus.Warnf("List %s failed : %v", objType.Name, err)
+			log.Warn().Msgf("List %s failed : %v", objType.Name, err)
 		} else {
 			res[objType.Name] = data
 		}
@@ -255,18 +255,16 @@ func getGAXData(gax, dumpUsername, dumpPassword string, list []object.Type) map[
 	c := client.NewClient(gax, false)
 	user, err := c.Login(dumpUsername, dumpPassword)
 	if err != nil {
-		logrus.Panicf("Login failed : %v", err)
+		log.Panic().Msgf("Login failed : %v", err)
 	}
-	logrus.WithFields(logrus.Fields{
-		"User": user,
-	}).Debugf("Logged as: %s", user.Username)
+	log.Debug().Interface("User", user).Msgf("Logged as: %s", user.Username)
 	var res = make(map[string][]interface{})
 	for _, objType := range list {
 		//Get objects
 		var data []interface{}
 		_, err := c.ListObject(objType.Name, &data)
 		if err != nil {
-			logrus.Warnf("List %s failed : %v", objType.Name, err)
+			log.Warn().Msgf("List %s failed : %v", objType.Name, err)
 		} else {
 			res[objType.Name] = data
 		}

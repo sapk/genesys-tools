@@ -4,9 +4,9 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/rs/zerolog/log"
 	"github.com/sapk/genesys-tools/tool/check"
 	"github.com/sapk/genesys-tools/tool/render"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +26,7 @@ var serveCmd = &cobra.Command{
 	Based on github.com/lithammer/go-wiki to render markdown file and display git history if files.
 	Ex:  genesys-tools serve hostb-8080`,
 	Args: func(cmd *cobra.Command, args []string) error {
-		logrus.Debug("Checking args for serve cmd: ", args)
+		log.Debug().Msg("Checking args for serve cmd: ", args)
 		if len(args) != 1 {
 			return fmt.Errorf("Requires one folder to display")
 		}

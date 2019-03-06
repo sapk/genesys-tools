@@ -7,8 +7,8 @@ import (
 
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/mitchellh/mapstructure"
+	"github.com/rs/zerolog/log"
 	"github.com/sapk/go-genesys/api/object"
-	"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -87,7 +87,7 @@ func formatPersonDetails(obj map[string]interface{}, data map[string][]interface
 	var person object.CfgPerson
 	err := mapstructure.Decode(obj, &person)
 	if err != nil {
-		logrus.Warnf("Fail to convert to CfgPerson")
+		log.Warn().Msgf("Fail to convert to CfgPerson")
 		return err.Error()
 	}
 	return ret
@@ -110,7 +110,7 @@ func formatPersonList(list object.CfgDBIDList, data map[string][]interface{}) (s
 			var user object.CfgPerson
 			err := mapstructure.Decode(val, &user)
 			if err != nil {
-				logrus.Warnf("Fail to convert to CfgPerson")
+				log.Warn().Msgf("Fail to convert to CfgPerson")
 				userList += "  dbid:" + username + "  \n"
 			} else {
 				userList += "  " + user.Username + " / " + user.Firstname + " " + user.Lastname + " (" + user.Employeeid + "/" + user.Dbid + ")  \n"
@@ -126,7 +126,7 @@ func formatAccessGroupDetails(obj map[string]interface{}, data map[string][]inte
 	var ag object.CfgAccessGroup
 	err := mapstructure.Decode(obj, &ag)
 	if err != nil {
-		logrus.Warnf("Fail to convert to CfgAccessGroup")
+		log.Warn().Msgf("Fail to convert to CfgAccessGroup")
 		return err.Error()
 	}
 	uL, uS := formatPersonList(ag.Memberids.Idtype, data) //TODO catch when memberids is not CFGPerson
@@ -139,7 +139,7 @@ func formatAgentGroupDetails(obj map[string]interface{}, data map[string][]inter
 	var ag object.CfgAgentGroup
 	err := mapstructure.Decode(obj, &ag)
 	if err != nil {
-		logrus.Warnf("Fail to convert to CfgAgentGroup")
+		log.Warn().Msgf("Fail to convert to CfgAgentGroup")
 		return err.Error()
 	}
 	uL, uS := formatPersonList(ag.Agentdbids.ID, data)

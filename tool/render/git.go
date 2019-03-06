@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 type Commit struct {
@@ -46,24 +46,24 @@ func Diff(file, hash string) ([]byte, error) {
 	var err error
 	tail.Stdin, err = git.StdoutPipe()
 	if err != nil {
-		logrus.Warnln("ERROR", err)
+		log.Warn().Msgf("ERROR: %v", err)
 	}
 
 	tail.Stdout = &out
 
 	err = tail.Start()
 	if err != nil {
-		logrus.Warnln("ERROR", err)
+		log.Warn().Msgf("ERROR: %v", err)
 	}
 
 	err = git.Run()
 	if err != nil {
-		logrus.Warnln("ERROR", err)
+		log.Warn().Msgf("ERROR: %v", err)
 	}
 
 	err = tail.Wait()
 	if err != nil {
-		logrus.Warnln("ERROR", err)
+		log.Warn().Msgf("ERROR: %v", err)
 	}
 
 	return out.Bytes(), err
@@ -78,7 +78,7 @@ func Commits(filename string, n int) ([]Commit, error) {
 	cmd := exec.Command("git", "-C", options.Dir, "log", "-n", strconv.Itoa(n), logFormat, filename)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		logrus.Warnln("ERROR", err)
+		log.Warn().Msgf("ERROR: %v", err)
 		return commits, err
 	}
 
@@ -86,7 +86,7 @@ func Commits(filename string, n int) ([]Commit, error) {
 
 	err = cmd.Start()
 	if err != nil {
-		logrus.Warnln("ERROR", err)
+		log.Warn().Msgf("ERROR: %v", err)
 		return commits, err
 	}
 
@@ -103,7 +103,7 @@ func Commits(filename string, n int) ([]Commit, error) {
 
 		unix, err := strconv.ParseInt(fields[2], 10, 64)
 		if err != nil {
-			logrus.Warnln("ERROR", err)
+			log.Warn().Msgf("ERROR: %v", err)
 		}
 		commit.Date = time.Unix(unix, 0)
 
@@ -121,14 +121,14 @@ func IsGitRepository(path string) bool {
 
 	err := cmd.Run()
 	if err != nil {
-		logrus.Warnln("ERROR", err)
+		log.Warn().Msgf("ERROR: %v", err)
 		return false
 	}
 
 	var val bool
 	_, err = fmt.Sscanf(out.String(), "%t", &val)
 	if err != nil {
-		logrus.Warnln("ERROR", err)
+		log.Warn().Msgf("ERROR: %v", err)
 		return false
 	}
 

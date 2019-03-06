@@ -4,25 +4,22 @@ package loader
 import (
 	"reflect"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/sapk/go-genesys/api/client"
 	"github.com/sapk/go-genesys/api/object"
-	"github.com/sirupsen/logrus"
 )
 
 func init() {
 	LoaderList["CfgAgentGroup"] = Loader{
 		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
-			logrus.WithFields(logrus.Fields{
-				"in": obj,
-			}).Debugf("CfgAgentGroup.FormatCreate")
+			log.Debug().Interface("in", obj).Msg("CfgAgentGroup.FormatCreate")
 			obj = LoaderList["default"].FormatCreate(c, obj, defaults)
 
 			for _, val := range []string{"capacityruledbid", "capacitytabledbid", "contractdbid", "quotatabledbid", "sitedbid"} {
 				if dbid, exist := obj[val]; exist {
 					if dbid != "0" {
-						logrus.WithFields(logrus.Fields{
-							val: dbid,
-						}).Warnf("Attached %s link will be lost", val)
+						log.Warn().Interface("val", dbid).Msgf("Attached %s link will be lost", val)
 						//TODO search
 						obj[val] = "0"
 					}
@@ -36,9 +33,7 @@ func init() {
 					}{Id: object.CfgDBIDList{}}
 					eq := reflect.DeepEqual(dbids, emptyDBIDList)
 					if !eq {
-						logrus.WithFields(logrus.Fields{
-							val: dbids,
-						}).Warnf("Attached %s link will be lost", val)
+						log.Warn().Interface("val", dbids).Msgf("Attached %s link will be lost", val)
 						obj[val] = emptyDBIDList
 					}
 				}
@@ -46,18 +41,13 @@ func init() {
 			return obj
 		},
 		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
-			logrus.WithFields(logrus.Fields{
-				"src": src,
-				"obj": obj,
-			}).Debugf("CfgAgentGroup.FormatUpdate")
+			log.Debug().Interface("src", src).Interface("obj", obj).Msg("CfgAgentGroup.FormatUpdate")
 			//TODO reuse by default value of src
 			obj = LoaderList["default"].FormatUpdate(c, src, obj, defaults)
 			for _, val := range []string{"capacityruledbid", "capacitytabledbid", "contractdbid", "quotatabledbid", "sitedbid"} {
 				if dbid, exist := obj[val]; exist {
 					if dbid != "0" {
-						logrus.WithFields(logrus.Fields{
-							val: dbid,
-						}).Warnf("Attached %s link will be lost", val)
+						log.Warn().Interface("val", dbid).Msgf("Attached %s link will be lost", val)
 						//TODO search
 						obj[val] = "0"
 					}
@@ -71,9 +61,7 @@ func init() {
 					}{Id: object.CfgDBIDList{}}
 					eq := reflect.DeepEqual(dbids, emptyDBIDList)
 					if !eq {
-						logrus.WithFields(logrus.Fields{
-							val: dbids,
-						}).Warnf("Attached %s link will be lost", val)
+						log.Warn().Interface("val", dbids).Msgf("Attached %s link will be lost", val)
 						obj[val] = emptyDBIDList
 					}
 				}
@@ -83,9 +71,7 @@ func init() {
 	}
 	LoaderList["CfgAgentLogin"] = Loader{
 		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
-			logrus.WithFields(logrus.Fields{
-				"in": obj,
-			}).Debugf("CfgAgentLogin.FormatCreate")
+			log.Debug().Interface("in", obj).Msg("CfgAgentLogin.FormatCreate")
 			obj = LoaderList["default"].FormatCreate(c, obj, defaults)
 			if sw, exist := obj["switchdbid"]; exist {
 				obj["switchdbid"] = searchFor(c, "CfgSwitch", sw.(string), defaults)
@@ -93,10 +79,7 @@ func init() {
 			return obj
 		},
 		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
-			logrus.WithFields(logrus.Fields{
-				"src": src,
-				"obj": obj,
-			}).Debugf("CfgAgentLogin.FormatUpdate")
+			log.Debug().Interface("src", src).Interface("obj", obj).Msg("CfgAgentLogin.FormatUpdate")
 			//TODO reuse by default value of src
 			obj = LoaderList["default"].FormatUpdate(c, src, obj, defaults)
 			if sw, exist := obj["switchdbid"]; exist {
@@ -107,16 +90,12 @@ func init() {
 	}
 	LoaderList["CfgPerson"] = Loader{
 		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
-			logrus.WithFields(logrus.Fields{
-				"in": obj,
-			}).Debugf("CfgPerson.FormatCreate")
+			log.Debug().Interface("in", obj).Msg("CfgPerson.FormatCreate")
 			obj = LoaderList["default"].FormatCreate(c, obj, defaults)
 			//agentlogins":{"agentlogininfo":[{"agentlogindbid":"151","wrapuptime":"0"}]},"appranks":{"apprank":[]},"
 			if contactdbid, exist := obj["contactdbid"]; exist {
 				if contactdbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"contactdbid": contactdbid,
-					}).Warn("Attached contract link will be lost")
+					log.Warn().Interface("contactdbid", contactdbid).Msg("Attached contract link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["contactdbid"] = "0"
@@ -124,9 +103,7 @@ func init() {
 			}
 			if capacityruledbid, exist := obj["capacityruledbid"]; exist {
 				if capacityruledbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"capacityruledbid": capacityruledbid,
-					}).Warn("Attached capacityrule link will be lost")
+					log.Warn().Interface("capacityruledbid", capacityruledbid).Msg("Attached capacityrule link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["capacityruledbid"] = "0"
@@ -145,9 +122,7 @@ func init() {
 				}{}}
 				eq := reflect.DeepEqual(agentlogins, emptyDBIDList)
 				if !eq {
-					logrus.WithFields(logrus.Fields{
-						"agentlogins": agentlogins,
-					}).Warn("Attached Agent Login link will be lost")
+					log.Warn().Interface("agentlogins", agentlogins).Msg("Attached Agent Login link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["agentlogins"] = emptyDBIDList
@@ -165,9 +140,7 @@ func init() {
 				}{apprank: []struct{}{}}
 				eq := reflect.DeepEqual(appranks, emptyDBIDList)
 				if !eq {
-					logrus.WithFields(logrus.Fields{
-						"appranks": appranks,
-					}).Warn("Attached appranks link will be lost")
+					log.Warn().Interface("appranks", appranks).Msg("Attached appranks link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["appranks"] = emptyDBIDList
@@ -175,9 +148,7 @@ func init() {
 			}
 			if sitedbid, exist := obj["sitedbid"]; exist {
 				if sitedbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"sitedbid": sitedbid,
-					}).Warn("Attached site link will be lost")
+					log.Warn().Interface("sitedbid", sitedbid).Msg("Attached site link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["sitedbid"] = "0"
@@ -186,9 +157,7 @@ func init() {
 
 			if sitedbid, exist := obj["sitedbid"]; exist {
 				if sitedbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"sitedbid": sitedbid,
-					}).Warn("Attached site link will be lost")
+					log.Warn().Interface("sitedbid", sitedbid).Msg("Attached site link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["sitedbid"] = "0"
@@ -196,9 +165,7 @@ func init() {
 			}
 			if placedbid, exist := obj["placedbid"]; exist {
 				if placedbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"placedbid": placedbid,
-					}).Warn("Attached place link will be lost")
+					log.Warn().Interface("placedbid", placedbid).Msg("Attached place link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["placedbid"] = "0"
@@ -218,31 +185,24 @@ func init() {
 				}{}}
 				eq := reflect.DeepEqual(skilllevels, emptyDBIDList)
 				if !eq {
-					logrus.WithFields(logrus.Fields{
-						"skilllevels": skilllevels,
-					}).Warn("Attached skilllevels link will be lost")
+					log.Warn().Interface("skilllevels", skilllevels).Msg("Attached skilllevels link will be lost")
 					//TODO search
 					obj["skilllevels"] = emptyDBIDList
 				}
 			}
 			delete(obj, "password") //Clear Password
-			logrus.Warn("Possible attached Agent password will be lost")
+			log.Warn().Msg("Possible attached Agent password will be lost")
 			//TODO password
 			return obj
 		},
 		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
-			logrus.WithFields(logrus.Fields{
-				"src": src,
-				"obj": obj,
-			}).Debugf("CfgPerson.FormatUpdate")
+			log.Debug().Interface("src", src).Interface("obj", obj).Msg("CfgPerson.FormatUpdate")
 			obj = LoaderList["default"].FormatCreate(c, obj, defaults)
 			//TODO reuse by default value of src
 			//agentlogins":{"agentlogininfo":[{"agentlogindbid":"151","wrapuptime":"0"}]},"appranks":{"apprank":[]},"
 			if contactdbid, exist := obj["contactdbid"]; exist {
 				if contactdbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"contactdbid": contactdbid,
-					}).Warn("Attached contract link will be lost")
+					log.Warn().Interface("contactdbid", contactdbid).Msg("Attached contract link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["contactdbid"] = "0"
@@ -250,9 +210,7 @@ func init() {
 			}
 			if capacityruledbid, exist := obj["capacityruledbid"]; exist {
 				if capacityruledbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"capacityruledbid": capacityruledbid,
-					}).Warn("Attached capacityrule link will be lost")
+					log.Warn().Interface("capacityruledbid", capacityruledbid).Msg("Attached capacityrule link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["capacityruledbid"] = "0"
@@ -271,9 +229,7 @@ func init() {
 				}{}}
 				eq := reflect.DeepEqual(agentlogins, emptyDBIDList)
 				if !eq {
-					logrus.WithFields(logrus.Fields{
-						"agentlogins": agentlogins,
-					}).Warn("Attached Agent Login link will be lost")
+					log.Warn().Interface("agentlogins", agentlogins).Msg("Attached Agent Login link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["agentlogins"] = emptyDBIDList
@@ -291,9 +247,7 @@ func init() {
 				}{apprank: []struct{}{}}
 				eq := reflect.DeepEqual(appranks, emptyDBIDList)
 				if !eq {
-					logrus.WithFields(logrus.Fields{
-						"appranks": appranks,
-					}).Warn("Attached appranks link will be lost")
+					log.Warn().Interface("appranks", appranks).Msg("Attached appranks link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["appranks"] = emptyDBIDList
@@ -301,9 +255,7 @@ func init() {
 			}
 			if sitedbid, exist := obj["sitedbid"]; exist {
 				if sitedbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"sitedbid": sitedbid,
-					}).Warn("Attached site link will be lost")
+					log.Warn().Interface("sitedbid", sitedbid).Msg("Attached site link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["sitedbid"] = "0"
@@ -311,9 +263,7 @@ func init() {
 			}
 			if placedbid, exist := obj["placedbid"]; exist {
 				if placedbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"placedbid": placedbid,
-					}).Warn("Attached place link will be lost")
+					log.Warn().Interface("placedbid", placedbid).Msg("Attached place link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["placedbid"] = "0"
@@ -333,16 +283,14 @@ func init() {
 				}{}}
 				eq := reflect.DeepEqual(skilllevels, emptyDBIDList)
 				if !eq {
-					logrus.WithFields(logrus.Fields{
-						"skilllevels": skilllevels,
-					}).Warn("Attached skilllevels link will be lost")
+					log.Warn().Interface("skilllevels", skilllevels).Msg("Attached skilllevels link will be lost")
 					//TODO search
 					obj["skilllevels"] = emptyDBIDList
 				}
 			}
 
 			delete(obj, "password") //Clear Password
-			logrus.Warn("Possible attached Agent password will be lost")
+			log.Warn().Msg("Possible attached Agent password will be lost")
 			//TODO password
 			return obj
 

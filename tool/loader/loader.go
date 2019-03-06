@@ -2,11 +2,11 @@
 package loader
 
 import (
+	"github.com/c-bata/go-prompt"
+	"github.com/rs/zerolog/log"
+
 	"github.com/sapk/genesys-tools/tool/format"
 	"github.com/sapk/go-genesys/api/client"
-
-	"github.com/c-bata/go-prompt"
-	"github.com/sirupsen/logrus"
 )
 
 var data map[string][]map[string]interface{}
@@ -16,14 +16,14 @@ func init() {
 }
 
 func ListObject(c *client.Client, t string) []map[string]interface{} {
-	logrus.WithField("type", t).Debugf("ListObject")
+	log.Debug().Interface("type", t).Msgf("ListObject")
 	if l, ok := data[t]; ok {
-		logrus.WithField("list", l).Debugf("ListObject in cache")
+		log.Debug().Interface("list", l).Msgf("ListObject in cache")
 		return l //don't get list allready done
 	}
 	var list []map[string]interface{}
 	c.ListObject(t, &list)
-	logrus.WithField("list", list).Debugf("ListObject fetched")
+	log.Debug().Interface("list", list).Msgf("ListObject fetched")
 	if t == "CfgTenant" {
 		list = append(list, map[string]interface{}{"name": "Environment", "dbid": "1"})
 	}
@@ -39,9 +39,7 @@ type Loader struct {
 var LoaderList = map[string]Loader{
 	"default": Loader{
 		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
-			logrus.WithFields(logrus.Fields{
-				"in": obj,
-			}).Debugf("default.FormatCreate")
+			log.Debug().Interface("in", obj).Msgf("default.FormatCreate")
 			//cleanObj(obj, "dbid", "hostdbid", "appprototypedbid") //TODO find matching prototype for app //TODO ask for password
 			cleanObj(obj, "dbid")
 			if tenant, exist := obj["tenantdbid"]; exist {
@@ -55,9 +53,7 @@ var LoaderList = map[string]Loader{
 						obj["userproperties"] = cleanEmptyAnnexes(userproperties.(map[string]interface{}))
 				}
 			*/
-			logrus.WithFields(logrus.Fields{
-				"out": obj,
-			}).Debugf("default.FormatCreate")
+			log.Debug().Interface("out", obj).Msgf("default.FormatCreate")
 			return obj
 		},
 		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
@@ -85,7 +81,7 @@ func cleanEmptyAnnexes(o map[string]interface{}) interface{} {
 	var obj object.Userproperties
 	err := mapstructure.Decode(o, &obj)
 	if err != nil {
-		logrus.Warnf("Fail to convert to Userproperties -> Skipping cleaning")
+		log.Warnf("Fail to convert to Userproperties -> Skipping cleaning")
 		return o
 	}
 	for id, val := range obj.Property {
@@ -102,29 +98,29 @@ func searchFor(c *client.Client, t string, id string, defaults map[string]string
 
 	//Use default value by default
 	if def, ok := defaults[t]; ok {
-		logrus.WithField("def", def).WithField("type", t).Debugf("Using default value")
+		log.Debug().Interface("def", def).Interface("type", t).Msgf("Using default value")
 		return def
 	}
 
 	list := ListObject(c, t)
-	logrus.WithField("list", list).WithField("type", t).Debugf("Fetched list")
-	logrus.Infof("Please choose a %s :", t)
+	log.Debug().Interface("list", list).Interface("type", t).Msgf("Fetched list")
+	log.Info().Msgf("Please choose a %s :", t)
 	val := prompt.Input("> ", func(d prompt.Document) []prompt.Suggest {
 		//log.Print(d.Text)
 		//		if d.Text == "" {
 		//			d.Text = "TEST"
 		//		}
-		//logrus.WithField("list", list).Info("Fetched list")
+		//log.Interface("list", list).Info("Fetched list")
 		//TODO put id corresponding obj if any first
 		s := make([]prompt.Suggest, len(list))
 		for i, o := range list {
-			//logrus.WithField("obj", o).Info("Add to list")
+			//log.Interface("obj", o).Info("Add to list")
 			s[i] = prompt.Suggest{o["dbid"].(string), format.GetFileName(o)}
 		}
 		return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
 	})
 
-	logrus.Infof("You selected " + val)
+	log.Info().Msgf("You selected " + val)
 	if val == "" {
 		switch t {
 		case "CfgTenant":
@@ -149,7 +145,7 @@ func FilterBy(obj map[string]interface{}, data []map[string]interface{}, cmp fun
 	ret := make([]map[string]interface{}, 0)
 	for _, o := range data {
 		if cmp(obj, o) {
-			logrus.WithField("obj", o).Info("Matched object")
+			log.Info().Interface("obj", o).Msg("Matched object")
 			ret = append(ret, o) //TODO best allocate
 		}
 	}
@@ -157,53 +153,31 @@ func FilterBy(obj map[string]interface{}, data []map[string]interface{}, cmp fun
 }
 
 func MatchId(src, dst map[string]interface{}) bool {
-	logrus.WithFields(logrus.Fields{
-		"cmp":    "dbid",
-		"src":    src["dbid"],
-		"dst":    dst["dbid"],
-		"result": src["dbid"] == dst["dbid"],
-	}).Debug("Matching dbid")
+	log.Debug().Str("cmp", "dbid").Interface("src", src["dbid"]).Interface("dst", dst["dbid"]).Interface("result", src["dbid"] == dst["dbid"]).Msg("Matching dbid")
 	return src["dbid"] == dst["dbid"]
 }
+
+func MatchByEl(src, dst map[string]interface{}, el string) bool {
+	log.Debug().Str("cmp", el).Interface("src", src[el]).Interface("dst", dst[el]).Interface("result", src[el] == dst[el]).Msg("Matching name")
+	return src[el] == dst[el]
+}
+
 func MatchName(src, dst map[string]interface{}) bool {
 	if src["name"] != nil && dst["name"] != nil {
-		logrus.WithFields(logrus.Fields{
-			"cmp":    "name",
-			"src":    src["name"],
-			"dst":    dst["name"],
-			"result": src["name"] == dst["name"],
-		}).Debug("Matching name")
-		return src["name"] == dst["name"]
+		return MatchByEl(src, dst, "name")
 	}
 	if src["username"] != nil && dst["username"] != nil {
-		logrus.WithFields(logrus.Fields{
-			"cmp":    "username",
-			"src":    src["username"],
-			"dst":    dst["username"],
-			"result": src["username"] == dst["username"],
-		}).Debug("Matching username")
-		return src["username"] == dst["username"]
+		return MatchByEl(src, dst, "username")
 	}
 	if src["number"] != nil && dst["number"] != nil {
-		logrus.WithFields(logrus.Fields{
-			"cmp":    "number",
-			"src":    src["number"],
-			"dst":    dst["number"],
-			"result": src["number"] == dst["number"],
-		}).Debug("Matching number")
-		return src["number"] == dst["number"]
+		return MatchByEl(src, dst, "number")
 	}
 	if src["logincode"] != nil && dst["logincode"] != nil {
-		logrus.WithFields(logrus.Fields{
-			"cmp":    "logincode",
-			"src":    src["logincode"],
-			"dst":    dst["logincode"],
-			"result": src["logincode"] == dst["logincode"],
-		}).Debug("Matching logincode")
-		return src["logincode"] == dst["logincode"]
+		return MatchByEl(src, dst, "logincode")
 	}
 	return false
 }
+
 func MatchIdName(src, dst map[string]interface{}) bool { //TODO Manage Person (username)
 	return MatchName(src, dst) && MatchId(src, dst)
 }

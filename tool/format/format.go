@@ -10,7 +10,7 @@ import (
 	"github.com/emirpasic/gods/maps/treemap"
 	"github.com/emirpasic/gods/sets/treeset"
 	"github.com/mitchellh/mapstructure"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 
 	"github.com/sapk/go-genesys/api/object"
 )
@@ -136,7 +136,7 @@ func formatFields(obj map[string]interface{}, data map[string][]interface{}) str
 	}
 	err := mapstructure.Decode(obj["fielddbids"], &ids)
 	if err != nil {
-		logrus.Warnf("Fail to convert to CfgDBIDList")
+		log.Warn().Msgf("Fail to convert to CfgDBIDList")
 		return err.Error()
 	}
 	for _, id := range ids.Id {
@@ -175,7 +175,7 @@ func findTenants(tenantdbids interface{}, data map[string][]interface{}) string 
 	var ids object.CfgDBIDList
 	err := mapstructure.Decode(obj["id"], &ids)
 	if err != nil {
-		logrus.Warnf("Fail to convert to CfgDBIDList")
+		log.Warn().Msgf("Fail to convert to CfgDBIDList")
 		return err.Error()
 	}
 	ret := " "
@@ -263,7 +263,7 @@ func formatAnnexes(obj map[string]interface{}, data map[string][]interface{}) st
 	var props object.Userproperties
 	err := mapstructure.Decode(obj["userproperties"], &props)
 	if err != nil {
-		logrus.Warnf("Fail to convert to Userproperties")
+		log.Warn().Msgf("Fail to convert to Userproperties")
 		return err.Error()
 	}
 
@@ -298,7 +298,7 @@ func formatOptions(obj map[string]interface{}, data map[string][]interface{}) st
 	var opts object.Options
 	err := mapstructure.Decode(obj["options"], &opts)
 	if err != nil {
-		logrus.Warnf("Fail to convert to Options")
+		log.Warn().Msgf("Fail to convert to Options")
 		return err.Error()
 	}
 

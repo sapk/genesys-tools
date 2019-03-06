@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/mattn/go-colorable"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -70,19 +71,20 @@ func initVerbose() {
 	if BuildTime != "" {
 		buildT, _ := time.Parse("2006-01-02-1504-UTC", BuildTime)
 		runT := time.Now()
-		//logrus.Warnf("'%s' %v < %v = %b", BuildTime, buildT, runT.AddDate(0, -6, 0), runT.AddDate(0, -6, 0).After(buildT))
+		//log.Warn().Msgf("'%s' %v < %v = %b", BuildTime, buildT, runT.AddDate(0, -6, 0), runT.AddDate(0, -6, 0).After(buildT))
 		if runT.AddDate(0, -6, 0).After(buildT) {
-			logrus.Warnln("This version of go-genesys-tools seems to old. Please upgrade to a newer one.")
+			log.Warn().Msg("This version of go-genesys-tools seems to old. Please upgrade to a newer one.")
 			os.Exit(0)
 		}
 	}
 	if appVerbose {
-		logrus.SetLevel(logrus.DebugLevel)
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else {
-		logrus.SetLevel(logrus.InfoLevel)
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 
 	//Get color on windows
-	logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
-	logrus.SetOutput(colorable.NewColorableStdout())
+	log.Logger = log.Output(zerolog.ConsoleWriter{
+		Out: colorable.NewColorableStdout(),
+	})
 }

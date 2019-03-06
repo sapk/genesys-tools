@@ -11,11 +11,11 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/sapk/genesys-tools/tool/check"
 	"github.com/sapk/genesys-tools/tool/format"
 	"github.com/sapk/genesys-tools/tool/loader"
 	"github.com/sapk/go-genesys/api/client"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -56,7 +56,7 @@ var importCmd = &cobra.Command{
 	Ex:  genesys-tools import hostb:8080 Application/*.md`,
 	//TODO list allowedImportTypes
 	Args: func(cmd *cobra.Command, args []string) error {
-		logrus.Debug("Checking args for import cmd: ", args)
+		log.Debug().Msgf("Checking args for import cmd: %s", args)
 		if len(args) < 2 {
 			return fmt.Errorf("requires at least one GAX server and one file to import")
 		}
@@ -81,57 +81,55 @@ var importCmd = &cobra.Command{
 		for _, def := range importDefaultAnswers {
 			tmp := strings.Split(def, "=")
 			if len(tmp) != 2 {
-				logrus.WithField("default", def).Warn("Invalid default ignored")
+				log.Warn().Interface("default", def).Msg("Invalid default ignored")
 				continue
 			}
-			logrus.WithField("type", tmp[0]).WithField("value", tmp[1]).Debug("Registering default value")
+			log.Debug().Interface("type", tmp[0]).Interface("value", tmp[1]).Msg("Registering default value")
 			defaults[tmp[0]] = tmp[1]
 		}
 		//Login
 		c := client.NewClient(gax, false)
 		user, err := c.Login(importUsername, importPassword)
 		if err != nil {
-			logrus.Panicf("Login failed : %v", err)
+			log.Panicf("Login failed : %v", err)
 		}
-		logrus.WithFields(logrus.Fields{
+		log.WithFields(log.Fields{
 			"User": user,
 		}).Debugf("Logged as: %s", user.Username)
 
 		for _, file := range args[1:] {
 			obj := getObj(file)
-			logrus.Infof("Parsing %s: %s", obj["type"], format.Name(obj))
-			logrus.WithFields(logrus.Fields{
-				"Object": obj,
-			}).Debug("Parsing object")
+			log.Info().Msgf("Parsing %s: %s", obj["type"], format.Name(obj))
+			log.Debug().Interface("Object", obj).Msg("Parsing object")
 
 			t, ok := obj["type"].(string)
 			if !ok {
-				logrus.Fatalf("Fail to find type of object %s : %v", file, obj)
+				log.Fatal().Msgf("Fail to find type of object %s : %v", file, obj)
 			}
 
 			if !allowedImportTypes[t] {
-				logrus.Warnf("Skipping file %s since type %s is not importable yet.", file, t)
+				log.Warn().Msgf("Skipping file %s since type %s is not importable yet.", file, t)
 				continue
 			}
 
 			l := loader.ListObject(c, t)
-			logrus.Debugf("List response : %v", l)
+			log.Debug().Msgf("List response : %v", l)
 
 			if len(l) == 0 { //no same object so we create
-				logrus.Debugf("Found no object with type : %v", t)
+				log.Debug().Msgf("Found no object with type : %v", t)
 				createObj(c, obj, defaults)
 			} else {
 				//Try to find if a app is matching
 				list := loader.FilterBy(obj, l, loader.MatchIdName)
 				if len(list) == 0 {
-					logrus.Debugf("Found no object with same DBID and Name")
+					log.Debug().Msgf("Found no object with same DBID and Name")
 					list = loader.FilterBy(obj, l, loader.MatchName)
 					if len(list) == 0 {
-						logrus.Debugf("Found no object with same Name")
+						log.Debug().Msgf("Found no object with same Name")
 						/* Temporary disable as it doesn't match change in name for exemple (detected on place)
 						list = loader.FilterBy(obj, l, loader.MatchId)
 						if len(list) == 0 {
-							logrus.Debugf("Found no object with same DBID")
+							log.Debug().Msgf("Found no object with same DBID")
 						}
 						*/
 					}
@@ -145,15 +143,15 @@ var importCmd = &cobra.Command{
 				case 1:
 					err = updateObj(c, list[0], obj, defaults)
 				default:
-					logrus.Warnf("Multiple object matching : %s", file)
+					log.Warn().Msgf("Multiple object matching : %s", file)
 					for _, src := range list {
 						updateObj(c, src, obj, defaults)
 					}
 				}
 				if err != nil {
-					logrus.WithField("object", obj).Errorf("Failed to import object: %v", err)
+					log.Error().Interface("object", obj).Msgf("Failed to import object: %v", err)
 				} else {
-					logrus.WithField("object", obj).Infof("Import object success !")
+					log.Info().Interface("object", obj).Msgf("Import object success !")
 				}
 			}
 		}
@@ -161,16 +159,10 @@ var importCmd = &cobra.Command{
 }
 
 func updateObj(c *client.Client, src map[string]interface{}, obj map[string]interface{}, defaults map[string]string) error {
-	logrus.WithFields(logrus.Fields{
-		"Source": src,
-		"Object": obj,
-	}).Info("Update object")
+	log.Info().Interface("Source", src).Interface("Object", obj).Msg("Update object")
 	eq := reflect.DeepEqual(obj, src)
 	if eq {
-		logrus.WithFields(logrus.Fields{
-			"Source": src,
-			"Object": obj,
-		}).Info("Skipping update of object because of equality")
+		log.Info().Interface("Source", src).Interface("Object", obj).Msg("Skipping update of object because of equality")
 		return nil
 	}
 	if f, ok := loader.LoaderList[obj["type"].(string)]; ok {
@@ -181,15 +173,10 @@ func updateObj(c *client.Client, src map[string]interface{}, obj map[string]inte
 	//TODO check eq after cleaning
 	eq = reflect.DeepEqual(obj, src)
 	if eq {
-		logrus.WithFields(logrus.Fields{
-			"Source": src,
-			"Object": obj,
-		}).Info("Skipping update of object because of equality after loading format")
+		log.Info().Interface("Source", src).Interface("Object", obj).Msg("Skipping update of object because of equality after loading format")
 		return nil
 	}
-	logrus.WithFields(logrus.Fields{
-		"Object": obj,
-	}).Debugf("Sending updated object")
+	log.Info().Interface("Object", obj).Msg("Sending updated object")
 	//TODO ask for ovveride
 	//TODO get dbid for older one ?
 	//TODO check possible deps
@@ -201,17 +188,13 @@ func updateObj(c *client.Client, src map[string]interface{}, obj map[string]inte
 	return nil
 }
 func createObj(c *client.Client, obj map[string]interface{}, defaults map[string]string) error {
-	logrus.WithFields(logrus.Fields{
-		"Object": obj,
-	}).Debug("Create object init")
+	log.Debug().Interface("Object", obj).Msg("Create object init")
 	if f, ok := loader.LoaderList[obj["type"].(string)]; ok {
 		obj = f.FormatCreate(c, obj, defaults)
 	} else {
 		obj = loader.LoaderList["default"].FormatCreate(c, obj, defaults)
 	}
-	logrus.WithFields(logrus.Fields{
-		"Object": obj,
-	}).Info("Create object")
+	log.Info().Interface("Object", obj).Msg("Create object")
 
 	if importForceYes || check.AskFor(fmt.Sprintf("Create %s", format.FormatShortObj(obj))) { // ask for confirmation
 		_, err := c.PostObject(obj) //TODO check up
@@ -223,28 +206,28 @@ func createObj(c *client.Client, obj map[string]interface{}, defaults map[string
 func getObj(file string) map[string]interface{} {
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
-		logrus.Fatalf("Read file %s failed : %v", file, err)
+		log.Fatal().Msgf("Read file %s failed : %v", file, err)
 	}
 	fileStr := string(b)
 
 	pos := strings.LastIndex(fileStr, "[//]: # ({")
 	if pos == -1 {
-		logrus.Fatalf("Fail to found raw dump in file %s : %v", file, err)
+		log.Fatal().Msgf("Fail to found raw dump in file %s : %v", file, err)
 	}
 	jsonStr := fileStr[pos+9:]
 
 	//TODO regex
 	pos = strings.Index(jsonStr, "})\n")
 	if pos == -1 {
-		logrus.Fatalf("Fail to found raw dump in file %s : %v", file, err)
+		log.Fatal().Msgf("Fail to found raw dump in file %s : %v", file, err)
 	}
 	jsonStr = jsonStr[:pos+1]
-	logrus.Debugf("Parsing JSON : %s", jsonStr)
+	log.Debug().Msgf("Parsing JSON : %s", jsonStr)
 
 	var data map[string]interface{}
 	err = json.Unmarshal([]byte(jsonStr), &data)
 	if err != nil {
-		logrus.Fatalf("Fail failed to parse %s : %v", jsonStr, err)
+		log.Fatal().Msgf("Fail failed to parse %s : %v", jsonStr, err)
 	}
 	return data
 }

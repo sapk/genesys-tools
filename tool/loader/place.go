@@ -4,25 +4,21 @@ package loader
 import (
 	"reflect"
 
+	"github.com/rs/zerolog/log"
 	"github.com/sapk/go-genesys/api/client"
 	"github.com/sapk/go-genesys/api/object"
-	"github.com/sirupsen/logrus"
 )
 
 func init() {
 	LoaderList["CfgPlace"] = Loader{
 		FormatCreate: func(c *client.Client, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
-			logrus.WithFields(logrus.Fields{
-				"in": obj,
-			}).Debugf("CfgPlace.FormatCreate")
+			log.Debug().Interface("in", obj).Msg("CfgPlace.FormatCreate")
 			obj = LoaderList["default"].FormatCreate(c, obj, defaults)
 			//lost link to contactdbid capacityruledbid dndbids sitedbid
 
 			if contactdbid, exist := obj["contactdbid"]; exist {
 				if contactdbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"contactdbid": contactdbid,
-					}).Warn("Attached contract link will be lost")
+					log.Warn().Interface("contactdbid", contactdbid).Msg("Attached contract link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["contactdbid"] = "0"
@@ -30,9 +26,7 @@ func init() {
 			}
 			if capacityruledbid, exist := obj["capacityruledbid"]; exist {
 				if capacityruledbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"capacityruledbid": capacityruledbid,
-					}).Warn("Attached capacityrule link will be lost")
+					log.Warn().Interface("capacityruledbid", capacityruledbid).Msg("Attached capacityrule link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["capacityruledbid"] = "0"
@@ -46,9 +40,7 @@ func init() {
 				eq := reflect.DeepEqual(dndbids, emptyDBIDList)
 				if !eq {
 					//if dndbids != "{\"id\":[]}" {
-					logrus.WithFields(logrus.Fields{
-						"dndbids": dndbids,
-					}).Warn("Attached DNs link will be lost")
+					log.Warn().Interface("dndbids", dndbids).Msg("Attached DNs link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["dndbids"] = emptyDBIDList
@@ -56,9 +48,7 @@ func init() {
 			}
 			if sitedbid, exist := obj["sitedbid"]; exist {
 				if sitedbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"sitedbid": sitedbid,
-					}).Warn("Attached site link will be lost")
+					log.Warn().Interface("sitedbid", sitedbid).Msg("Attached site link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["sitedbid"] = "0"
@@ -67,19 +57,14 @@ func init() {
 			return obj
 		},
 		FormatUpdate: func(c *client.Client, src, obj map[string]interface{}, defaults map[string]string) map[string]interface{} {
-			logrus.WithFields(logrus.Fields{
-				"src": src,
-				"obj": obj,
-			}).Debugf("CfgPlace.FormatUpdate")
+			log.Debug().Interface("src", src).Interface("obj", obj).Msg("CfgPlace.FormatUpdate")
 			//TODO reuse by default value of src
 			obj = LoaderList["default"].FormatUpdate(c, src, obj, defaults)
 			//lost link to contactdbid capacityruledbid dndbids sitedbid
 
 			if contactdbid, exist := obj["contactdbid"]; exist {
 				if contactdbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"contactdbid": contactdbid,
-					}).Warn("Attached contract link will be lost")
+					log.Warn().Interface("contactdbid", contactdbid).Msg("Attached contract link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["contactdbid"] = "0"
@@ -87,9 +72,7 @@ func init() {
 			}
 			if capacityruledbid, exist := obj["capacityruledbid"]; exist {
 				if capacityruledbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"capacityruledbid": capacityruledbid,
-					}).Warn("Attached capacityrule link will be lost")
+					log.Warn().Interface("capacityruledbid", capacityruledbid).Msg("Attached capacityrule link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["capacityruledbid"] = "0"
@@ -103,9 +86,7 @@ func init() {
 				eq := reflect.DeepEqual(dndbids, emptyDBIDList)
 				if !eq {
 					//if dndbids != "{\"id\":[]}" {
-					logrus.WithFields(logrus.Fields{
-						"dndbids": dndbids,
-					}).Warn("Attached DNs link will be lost")
+					log.Warn().Interface("dndbids", dndbids).Msg("Attached DNs link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["dndbids"] = emptyDBIDList
@@ -113,9 +94,7 @@ func init() {
 			}
 			if sitedbid, exist := obj["sitedbid"]; exist {
 				if sitedbid != "0" {
-					logrus.WithFields(logrus.Fields{
-						"sitedbid": sitedbid,
-					}).Warn("Attached site link will be lost")
+					log.Warn().Interface("sitedbid", sitedbid).Msg("Attached site link will be lost")
 					//TODO search
 					//obj["contactdbid"] = searchFor(c, "CfgScript", contract.(string))
 					obj["sitedbid"] = "0"

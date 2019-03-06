@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/shurcooL/github_flavored_markdown"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
+	"github.com/russross/blackfriday"
 )
 
 func DiffHandler(w http.ResponseWriter, r *http.Request) {
@@ -20,13 +20,14 @@ func DiffHandler(w http.ResponseWriter, r *http.Request) {
 
 	diff, err := Diff(file, hash)
 	if err != nil {
-		logrus.Warnln("ERROR", "Failed to get commit hash", hash)
+		log.Warn().Msgf("ERROR: Failed to get commit hash: %s", hash)
 	}
 
 	// XXX: This could probably be done in a nicer way
 	wrappedDiff := []byte("```diff\n" + string(diff) + "```")
-	// md := blackfriday.MarkdownCommon(wrappedDiff)
-	md := github_flavored_markdown.Markdown(wrappedDiff)
+	//md := blackfriday.MarkdownCommon(wrappedDiff)
+	md := blackfriday.Run(wrappedDiff, blackfriday.WithExtensions(blackfriday.CommonExtensions))
+	//md := github_flavored_markdown.Markdown(wrappedDiff)
 
 	w.Header().Set("Content-Type", "text/html")
 	w.Write(md)

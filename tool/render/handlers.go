@@ -9,7 +9,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 const imageTypes = ".jpg .jpeg .png .gif"
@@ -59,7 +59,7 @@ func WikiHandler(w http.ResponseWriter, r *http.Request) {
 
 	wiki.Commits, err = Commits(filePath+".md", 5)
 	if err != nil {
-		logrus.Warnln("ERROR", "Failed to get commits")
+		log.Warn().Msg("ERROR: Failed to get commits")
 	}
 
 	wiki.Write(w)
