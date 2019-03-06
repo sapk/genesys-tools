@@ -91,11 +91,9 @@ var importCmd = &cobra.Command{
 		c := client.NewClient(gax, false)
 		user, err := c.Login(importUsername, importPassword)
 		if err != nil {
-			log.Panicf("Login failed : %v", err)
+			log.Panic().Msgf("Login failed : %v", err)
 		}
-		log.WithFields(log.Fields{
-			"User": user,
-		}).Debugf("Logged as: %s", user.Username)
+		log.Debug().Interface("User", user).Msgf("Logged as: %s", user.Username)
 
 		for _, file := range args[1:] {
 			obj := getObj(file)
