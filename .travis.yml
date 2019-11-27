@@ -8,9 +8,13 @@ go:
 env:
   - GO111MODULE=on
 
-install: make deps
-script: make build
-before_deploy: make release
+install: 
+  - make deps
+script: 
+  - make build
+  - ./genesys-tools -h
+before_deploy: 
+  - make release
 deploy:
   provider: releases
   file_glob: true
