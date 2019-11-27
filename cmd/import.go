@@ -42,6 +42,7 @@ var allowedImportTypes = map[string]bool{
 //TODO importe template and metadata first
 //TODO afficher les connection et lien manquant , host, ...
 func init() {
+	//These default login is not a secret since on public genesys website: https://docs.genesys.com/Documentation/FR/Current/Dep/StdLogin
 	importCmd.Flags().StringVarP(&importUsername, "user", "u", "default", "GAX user name")
 	importCmd.Flags().StringVarP(&importPassword, "pass", "p", "password", "GAX user password")
 	importCmd.Flags().BoolVarP(&importForceYes, "force", "f", false, "Implies yes to each questions")
