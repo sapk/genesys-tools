@@ -43,7 +43,7 @@ format:
 
 compile:
 	@echo -e "$(OK_COLOR)==> Building...$(NO_COLOR)"
-	GO111MODULE=on go build -v -ldflags "$(LDFLAGS)" -o $(APP_NAME)
+	GO111MODULE=on go build -mod=vendor -v -ldflags "$(LDFLAGS)" -o $(APP_NAME)
 
 compress:
 	@echo -e "$(OK_COLOR)==> Trying to compress binary ...$(NO_COLOR)"
