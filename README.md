@@ -4,5 +4,5 @@ go build -o genesys-tools .
 
 gox -ldflags "-s -w" -osarch="windows/amd64" -output="build/{{.Dir}}-tools-{{.OS}}-{{.Arch}}"
 
-dot -Tpng emsw1352-8080/graph.dot > test.png
-dot -Tsvg emsw1352-8080/graph.dot > test.svg
+dot -Tpng host-port/graph.dot > test.png
+dot -Tsvg host-port/graph.dot > test.svg
